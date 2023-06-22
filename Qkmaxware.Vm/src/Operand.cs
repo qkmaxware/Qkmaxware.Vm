@@ -37,6 +37,6 @@ public class Operand : VmValue {
     }
 
     public override string ValueToString() {
-        return "0";
+        return "0x" + this.value.ToString("X");
     }
 }

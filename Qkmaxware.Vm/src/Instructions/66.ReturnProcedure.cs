@@ -7,7 +7,7 @@ public class ReturnProcedure : Instruction {
     
     public ReturnProcedure() {
         // Set opcode
-        this.Opcode = 0x64; 
+        this.Opcode = 0x66; 
         
         // Arguments
     }

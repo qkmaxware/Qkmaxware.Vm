@@ -7,7 +7,7 @@ public class StoreLocal : Instruction {
 
     public StoreLocal() {
         // Set opcode
-        this.Opcode = 0x68; 
+        this.Opcode = 0x69; 
         
         // Arguments
         this.AddArgument(new Int32Argument("Local Index"));

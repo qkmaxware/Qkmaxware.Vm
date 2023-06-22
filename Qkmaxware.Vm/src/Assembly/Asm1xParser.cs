@@ -3,6 +3,21 @@ using System.Text.RegularExpressions;
 
 namespace Qkmaxware.Vm.Assembly;
 
+// Examples
+/*
+// File Main.qkasm
+
+
+// File Library.qkasm
+
+
+// Assemble and link the 2
+// qkvm assemble -f Main.qkasm
+// qkvm assemble -f Library.qkasm
+// qkvm link -f Main.qkbc -l Library.qkbc -o out.qkbc
+// qkvm run -f out.qkbc
+*/
+
 /// <summary>
 /// Parser for "asm 1.x" assembly files
 /// </summary>
@@ -14,6 +29,7 @@ public class Asm1xParser : IAssemblyParser {
     public Module Parse(TextReader reader) {
         using var builder = new ModuleBuilder();
         Dictionary<string, Label> labels = new Dictionary<string, Label>();
+        List<LabelThunk> label_thunks = new List<LabelThunk>();
         Dictionary<string, ConstantRef> constants = new Dictionary<string, ConstantRef>();
 
         string? line = null;
@@ -26,17 +42,23 @@ public class Asm1xParser : IAssemblyParser {
                     continue;
 
                 // Handle different line types
-                if (line.StartsWith('@')) {
+                if (line.StartsWith("import ")) {
+                    handleImport(builder, line);
+                } 
+                else if (line.StartsWith("export ")) {
+                    handleExport(builder, line);
+                }
+                else if (line.StartsWith('@')) {
                     handleConstant(builder, labels, constants, line);
                 }
                 else if (line.StartsWith('.')) {
-                    handleLabel(builder, labels, constants, line);
+                    handleLabel(builder, labels, label_thunks, constants, line);
                 }
                 else if (line.StartsWith("!")) {
                     handleMacro(builder, labels, constants, line);
                 }
                 else {
-                    handleInstruction(builder, labels, constants, line);
+                    handleInstruction(builder, labels, label_thunks, constants, line);
                 }
 
                 // Increment line index
@@ -46,7 +68,35 @@ public class Asm1xParser : IAssemblyParser {
             }
         }
 
+        var stillWaiting = label_thunks.SelectMany(x => x.AwaitingLabels).Distinct().ToList();
+        if (stillWaiting.Any()) {
+            throw new ArgumentException($"Labels {string.Join(',', stillWaiting)} are not defined.");
+        }
         return builder.ToModule();
+    }
+
+    private static Regex importPattern = new Regex(@"^\s*import\s+(?<value>"".+)");
+    private void handleImport(ModuleBuilder builder, string line) {
+        var match = importPattern.Match(line);
+        if (!match.Success) {
+            throw new FormatException("Invalid import format, missing doubly quoted import name");
+        }
+        var value = System.Text.Json.JsonSerializer.Deserialize<string>(match.Groups["value"].Value);
+        if (value == null)  
+            throw new FormatException("Invalid string representation for name");
+        builder.ImportSubprogram(value);
+    }
+
+    private static Regex exportPattern = new Regex(@"^\s*export\s+(?<value>"".+)");
+    private void handleExport(ModuleBuilder builder, string line) {
+        var match = exportPattern.Match(line);
+        if (!match.Success) {
+            throw new FormatException("Invalid export format, missing doubly quoted exported name");
+        }
+        var value = System.Text.Json.JsonSerializer.Deserialize<string>(match.Groups["value"].Value);
+        if (value == null)  
+            throw new FormatException("Invalid string representation for name");
+        builder.ExportSubprogram(value);
     }
 
     private static Regex constantPattern = new Regex(@"^\s*\@(?<id>\w+)\s*=\s*(?<value>.+)");
@@ -94,7 +144,7 @@ public class Asm1xParser : IAssemblyParser {
     }
 
     private static Regex labelPattern = new Regex(@"^\s*\.(?<id>\w+)\s*$");
-    private void handleLabel(ModuleBuilder builder, Dictionary<string, Label> labels, Dictionary<string, ConstantRef> consts, string line) {
+    private void handleLabel(ModuleBuilder builder, Dictionary<string, Label> labels, List<LabelThunk> label_thunks, Dictionary<string, ConstantRef> consts, string line) {
         var match = labelPattern.Match(line);
         if (!match.Success) {
             throw new FormatException("Invalid label format. Labels should be a '.' followed by any number of the following digits [a-zA-Z0-9_].");
@@ -102,6 +152,9 @@ public class Asm1xParser : IAssemblyParser {
         var id = match.Groups["id"].Value;
         var label = builder.Label(id);
         labels[id] = label;
+
+        // See if any instructions are awaiting having this label determined
+        label_thunks.RemoveAll((thunk) => thunk.ComputeIfPossible(labels));
     }
 
     private static Regex macroPattern = new Regex(@"^\s*\!(?<id>\w+)\s*(?<args>.*)");
@@ -130,6 +183,7 @@ public class Asm1xParser : IAssemblyParser {
 
     private static Regex labelNameRegex = new Regex(@"^\.(?<id>\w+)");
     private static Regex constantNameRegex = new Regex(@"^\@(?<id>\w+)");
+    private static Regex stringRegex = new Regex(@"^((?<![\\])[""])((?:.(?!(?<![\\])\1))*.?)\1");
     private object[] readMacroArgs(Dictionary<string, Label> labels, Dictionary<string, ConstantRef> consts, string argList) {
         if (string.IsNullOrEmpty(argList))
             return new object[0];
@@ -152,6 +206,12 @@ public class Asm1xParser : IAssemblyParser {
             var imatch = intPattern.Match(arg);
             if (imatch.Success) {
                 parsed[i] = (int.Parse(imatch.Value));
+                continue;
+            }
+            
+            var smatch = stringRegex.Match(arg);
+            if (smatch.Success) {
+                parsed[i] = System.Text.Json.JsonSerializer.Deserialize<string>(smatch.Value) ?? string.Empty;
                 continue;
             }
 
@@ -178,7 +238,7 @@ public class Asm1xParser : IAssemblyParser {
     }
 
     private static Regex instrPattern = new Regex(@"^\s*(?<id>\w+)\s*(?<args>.*)");
-    private void handleInstruction(ModuleBuilder builder, Dictionary<string, Label> labels, Dictionary<string, ConstantRef> consts, string line) { 
+    private void handleInstruction(ModuleBuilder builder, Dictionary<string, Label> labels, List<LabelThunk> label_thunks, Dictionary<string, ConstantRef> consts, string line) { 
         var match = instrPattern.Match(line);
         if (!match.Success) {
             throw new FormatException("Invalid instruction format. Instruction names should be any number of the following digits [a-zA-Z0-9_]. Arguments should follow instruction names separated by spaces.");
@@ -186,17 +246,30 @@ public class Asm1xParser : IAssemblyParser {
         var id = match.Groups["id"].Value;
         var args = match.Groups["args"].Value.Trim();
 
-        var values = readInitialInstrArgs(labels, consts, args);
+        List<string> labels_requiring_thunk;
+        var values = readInitialInstrArgs(labels, consts, args, out labels_requiring_thunk);
 
         var before = builder.Anchor();
         builder.AddInstruction(id, values); // Push empty values
         var after = builder.Anchor();
-        builder.RewindStream(before);
-        values = readFinalInstrArgs(after, labels, consts, args);
-        builder.AddInstruction(id, values); // Push actual values
+        
+        if (labels_requiring_thunk.Any()) {
+            label_thunks.Add(new LabelThunk(labels_requiring_thunk, (labels) => {
+                var now = builder.Anchor();
+                builder.RewindStream(before);
+                values = readFinalInstrArgs(after, builder, labels, consts, args);
+                builder.AddInstruction(id, values); // Push actual values
+                builder.RewindStream(now);
+            }));
+        } else {
+            builder.RewindStream(before);
+            values = readFinalInstrArgs(after, builder, labels, consts, args);
+            builder.AddInstruction(id, values); // Push actual values
+        }
     }
 
-    private VmValue[] readInitialInstrArgs(Dictionary<string, Label> labels, Dictionary<string, ConstantRef> consts, string argList) {
+    private VmValue[] readInitialInstrArgs(Dictionary<string, Label> labels, Dictionary<string, ConstantRef> consts, string argList, out List<string> requires_thunk) {
+        requires_thunk = new List<string>();
         if (string.IsNullOrEmpty(argList))
             return new VmValue[0];
 
@@ -221,9 +294,18 @@ public class Asm1xParser : IAssemblyParser {
                 continue;
             }
 
+            var smatch = stringRegex.Match(arg);
+            if (smatch.Success) {
+                parsed[i] = Operand.From(0);
+                continue;
+            }
+
             var lmatch = labelNameRegex.Match(arg);
             if (lmatch.Success) {
                 // goto .my_func
+                var constId = lmatch.Groups["id"].Value;
+                if (!labels.ContainsKey(constId))
+                    requires_thunk.Add(constId);
                 parsed[i] = Operand.From(0);
                 continue;
             }
@@ -237,7 +319,7 @@ public class Asm1xParser : IAssemblyParser {
         }
         return parsed;
     }
-    private VmValue[] readFinalInstrArgs(long positionAfterInstruction, Dictionary<string, Label> labels, Dictionary<string, ConstantRef> consts, string argList) {
+    private VmValue[] readFinalInstrArgs(long positionAfterInstruction, ModuleBuilder builder, Dictionary<string, Label> labels, Dictionary<string, ConstantRef> consts, string argList) {
         if (string.IsNullOrEmpty(argList))
             return new VmValue[0];
 
@@ -262,6 +344,18 @@ public class Asm1xParser : IAssemblyParser {
                 continue;
             }
 
+            var smatch = stringRegex.Match(arg);
+            if (smatch.Success) {
+                var name = System.Text.Json.JsonSerializer.Deserialize<string>(smatch.Value);
+                int index;
+                if (builder.HasImportedSubprogram(name, out index)) {
+                    parsed[i] = Operand.From(index);
+                } else {
+                    throw new MissingMemberException($"No import defined with name '{name}'.");
+                }
+                continue;
+            }
+
             var lmatch = labelNameRegex.Match(arg);
             if (lmatch.Success) {
                 // goto .my_func
@@ -283,5 +377,25 @@ public class Asm1xParser : IAssemblyParser {
             throw new FormatException("Unknown argument type");
         }
         return parsed;
+    }
+}
+
+
+class LabelThunk {
+    public IEnumerable<string> AwaitingLabels {get; private set;}
+    private Action<Dictionary<string, Label>> computation;
+
+    public LabelThunk(IEnumerable<string> awaiting, Action<Dictionary<string, Label>> computation) {
+        this.AwaitingLabels = awaiting;
+        this.computation = computation;
+    }
+
+    public bool ComputeIfPossible(Dictionary<string, Label> labels) {
+        if (!AwaitingLabels.Except(labels.Keys).Any()) {
+            computation(labels);
+            return true;
+        } else {
+            return false;
+        }
     }
 }

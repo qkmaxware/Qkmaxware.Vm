@@ -23,7 +23,7 @@ public class DisassembledInstruction {
         sb.Append(this.Instruction.Name);
         foreach (var arg in Arguments) {
             sb.Append(' ');
-            sb.Append(arg);
+            sb.Append(arg.ValueToString());
         }
         return sb.ToString();
     }

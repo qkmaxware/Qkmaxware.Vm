@@ -9,7 +9,7 @@ public class Assemble : BaseCommand {
     [Option('f', "file", HelpText = "Path to bytecode file", Required = true)]
     public string? FileName {get; set;}
 
-    [Option('o', "out", HelpText = "Path to bytecode file")]
+    [Option('o', "out", HelpText = "Output path to resulting bytecode file")]
     public string? OutputFileName {get; set;}
 
     public override void Execute() {

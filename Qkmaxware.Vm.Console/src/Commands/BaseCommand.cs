@@ -21,6 +21,10 @@ public abstract class BaseCommand {
         return FileName;
     }
 
+    protected void AssertBytecodeFile(string FileName) {
+        int ma; int mi;
+        AssertBytecodeFile(FileName, out ma, out mi);
+    }
     protected void AssertBytecodeFile(string FileName, out int major_version, out int minor_version) {
         using (var header_reader = new BinaryReader(File.OpenRead(FileName))) {
             foreach (var magic_byte in Module.MagicNumbers) {

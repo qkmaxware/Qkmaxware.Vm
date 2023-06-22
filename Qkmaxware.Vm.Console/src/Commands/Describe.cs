@@ -17,13 +17,33 @@ public class Describe : BaseCommand {
         int major;
         int minor;
         AssertBytecodeFile(this.FileName, out major, out minor);
-        Console.WriteLine("Qkmaxware Bytecode Module");
-        Console.WriteLine($"version {major}.{minor}");
-        Console.WriteLine();
 
         ModuleLoader loader = new ModuleLoader();
-        using var reader = new BinaryReader(File.OpenRead(this.FileName));
+        var file = new FileInfo(this.FileName);
+        using var reader = new BinaryReader(file.OpenRead());
         var module = loader.FromStream(reader);  
+
+        Console.WriteLine("Qkmaxware Bytecode Module");
+        Console.WriteLine($"version: {major}.{minor}");
+        Console.WriteLine($"size: {file.Length} bytes");
+        Console.WriteLine($"last modified: {file.LastWriteTime}");
+        Console.WriteLine();
+
+        Console.WriteLine($"Exports ({module.ExportCount}):");
+        foreach (var export in module.Exports) {
+            Console.Write("    - ");
+            Console.Write(export.Name);
+            Console.Write(" @ 0x");
+            Console.WriteLine(export.CodePosition.ToString("X"));
+        }
+        Console.WriteLine();
+
+        Console.WriteLine($"Imports ({module.ImportCount}):");
+        foreach (var import in module.Imports) {
+            Console.Write("    - ");
+            Console.WriteLine(import.Name);
+        }
+        Console.WriteLine();
 
         var dis = new Disassembler();
         Console.WriteLine($"Code ({module.CodeLength} bytes):");
@@ -34,7 +54,7 @@ public class Describe : BaseCommand {
             Console.Write(line.Instruction.Name);
             foreach (var arg in line.Arguments) {
                 Console.Write(' ');
-                Console.Write(arg);
+                Console.Write(arg.ValueToString());
             }
             Console.WriteLine();
         }

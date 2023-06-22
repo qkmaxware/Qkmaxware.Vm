@@ -55,4 +55,34 @@ public partial class ModuleBuilder {
         this.AddInstruction("pop");                           // []
     }
 
+    /// <summary>
+    /// Create an ascii string constant and immediately load it to the stack
+    /// </summary>
+    /// <param name="text">constant text</param>
+    [Macro("immediate_ascii")]
+    public void PushAscii(string text) {
+        var constant = this.AddConstantAsciiString(text);
+        this.PushConstant(constant);
+    }
+
+    /// <summary>
+    /// Create a UTF8 string constant and immediately load it to the stack
+    /// </summary>
+    /// <param name="text">constant text</param>
+    [Macro("immediate_utf8")]
+    public void PushUtf8(string text) {
+        var constant = this.AddConstantUtf8String(text);
+        this.PushConstant(constant);
+    }
+
+    /// <summary>
+    /// Create a UTF32 string constant and immediately load it to the stack
+    /// </summary>
+    /// <param name="text">constant text</param>
+    [Macro("immediate_utf32")]
+    public void PushUtf32(string text) {
+        var constant = this.AddConstantUtf32String(text);
+        this.PushConstant(constant);
+    }
+
 }

@@ -7,7 +7,7 @@ public class LoadLocal : Instruction {
 
     public LoadLocal() {
         // Set opcode
-        this.Opcode = 0x66; 
+        this.Opcode = 0x68; 
         
         // Arguments
         this.AddArgument(new Int32Argument("Local Index"));

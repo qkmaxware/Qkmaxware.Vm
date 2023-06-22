@@ -5,6 +5,55 @@ namespace Qkmaxware.Vm;
 /// </summary>
 public partial class ModuleBuilder {
     /// <summary>
+    /// Declare a name as an imported label
+    /// </summary>
+    /// <param name="name">subprogram external name</param>
+    /// <returns>import reference</returns>
+    public Vm.Import ImportSubprogram(string name) {
+        var imp = new Vm.Import(name);
+        this.imports.Add(imp);
+        return imp;
+    }
+
+    /// <summary>
+    /// Checks if a subprogram has been imported. If so it gets the import's index.
+    /// </summary>
+    /// <param name="name">subprogram name</param>
+    /// <param name="import">subprogram index</param>
+    /// <returns>true if a subprogram with the given name has been imported</returns>
+    public bool HasImportedSubprogram(string? name, out int index) {
+        index = -1;
+        for (var i = 0; i < imports.Count; i++) {
+            if (imports[i].Name == name) {
+                index = i;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Declare this spot of the code to be an exported subprogram
+    /// </summary>
+    /// <param name="name">subprogram external name</param>
+    /// <returns>exported reference</returns>
+    public Vm.Export ExportSubprogram(string name) {
+        // Generate unique name
+        var unique_index = 0;
+        var unique_name = name;
+        while(export_names.Contains(unique_name)) {
+            unique_name = name + (unique_index++);
+        }
+
+        // Store it
+        var index = bytecode.BaseStream.Position;
+        export_names.Add(name);
+        var export = new Export(name, (int)index);
+        exports.Add(export);
+        return export;
+    }
+
+    /// <summary>
     /// Create a named label to the next instruction in the code section
     /// </summary>
     /// <param name="str">desired label name</param>

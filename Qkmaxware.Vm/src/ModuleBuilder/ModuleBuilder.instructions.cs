@@ -38,6 +38,9 @@ public partial class ModuleBuilder {
     public void PushConstant(int constantPoolIndex) {
         this.AddInstruction("load_const", Operand.From(constantPoolIndex));
     }
+    public void PushConstant(ConstantRef constant) {
+        this.AddInstruction("load_const", Operand.From(constant.PoolIndex));
+    }
 
     public void PushLocal(int localIndex) {
         this.AddInstruction("load_local", Operand.From(localIndex));
@@ -138,6 +141,13 @@ public partial class ModuleBuilder {
     }
     public void Call(int offset, int argc) {
         this.AddInstruction("call", new VmValue[]{Operand.From(offset), Operand.From(argc)});
+    }
+
+    public void CallExternal(Import import, int argc) {
+        this.AddInstruction("call_external", new VmValue[]{Operand.From(this.imports.IndexOf(import)), Operand.From(argc)});
+    }
+    public void CallExternal(int importIndex, int argc) {
+        this.AddInstruction("call_external", new VmValue[]{Operand.From(importIndex), Operand.From(argc)});
     }
 
     public void PushArgument(int argIndex) {
