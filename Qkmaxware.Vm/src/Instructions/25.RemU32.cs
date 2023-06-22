@@ -1,0 +1,23 @@
+namespace Qkmaxware.Vm.Instructions;
+
+/// <summary>
+/// Remainder after division of 2 unsigned integers
+/// </summary>
+public class RemU32 : Instruction {
+
+    public RemU32() {
+        // Set opcode
+        this.Opcode = 0x25; 
+        
+        // Arguments
+    }
+
+    public override string Description => "Arithmetic remainder between 2 unsigned integers at the top of the operand stack";
+
+    public override void Action(VmValue[] args, RuntimeEnvironment runtime) {
+        var rhs = (UInt32Operand)runtime.Stack.PopTop();
+        var lhs = (UInt32Operand)runtime.Stack.PopTop();
+
+        runtime.Stack.PushTop(new UInt32Operand(lhs.Value % rhs.Value));
+    }
+}
