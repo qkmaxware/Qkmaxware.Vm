@@ -9,7 +9,7 @@ namespace Qkmaxware.Vm.Terminal.Commands;
 
 [Verb("run", HelpText = "Run a bytecode module")]
 public class Run : BaseCommand {
-    [Option('f', "file", HelpText = "Path to bytecode file")]
+    [Option('f', "file", HelpText = "Path to bytecode file", Required = true)]
     public string? FileName {get; set;}
 
     [Option("heap", HelpText = "Size of the heap", Default = "1024 bytes")]

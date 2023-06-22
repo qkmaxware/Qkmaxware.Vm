@@ -6,8 +6,11 @@ namespace Qkmaxware.Vm.Terminal.Commands;
 
 [Verb("convert", HelpText = "Convert bytecode modules from older formats to the latest format")]
 public class ConvertVersion : BaseCommand {
-    [Option('f', "file", HelpText = "Path to bytecode file")]
+    [Option('f', "file", HelpText = "Path to bytecode file", Required = true)]
     public string? FileName {get; set;}
+
+    [Option('o', "out", HelpText = "Path to bytecode file")]
+    public string? OutputFileName {get; set;}
 
     public override void Execute() {
         this.FileName = VerifyFile(FileName);
@@ -28,8 +31,15 @@ public class ConvertVersion : BaseCommand {
         var module = loader.FromStream(reader);
 
         // Create new file
-        using (var writer = new BinaryWriter(CreateFileInSameDirectoryAs(this.FileName, NameOf(this.FileName) + $"-{Module.MajorVersion}.{Module.MinorVersion}.qkbc"))) {
+        var stream = 
+            string.IsNullOrEmpty(this.OutputFileName) 
+            ? CreateFileInSameDirectoryAs(this.FileName, NameOf(this.FileName) + $"-{Module.MajorVersion}.{Module.MinorVersion}.qkbc") 
+            : (Stream)File.Open(this.OutputFileName, FileMode.Open);
+        using (var writer = new BinaryWriter(stream)) {
             module.EncodeFile(writer);
         }
+
+        var name = string.IsNullOrEmpty(this.OutputFileName) ? NameOf(FileName) + $"-{Module.MajorVersion}.{Module.MinorVersion}.qkbc": this.OutputFileName;
+        Console.WriteLine("File created '" + name);
     }
 }

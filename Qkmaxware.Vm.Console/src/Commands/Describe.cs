@@ -8,7 +8,7 @@ namespace Qkmaxware.Vm.Terminal.Commands;
 
 [Verb("describe", HelpText = "Describe a bytecode module")]
 public class Describe : BaseCommand {
-    [Option('f', "file", HelpText = "Path to bytecode file")]
+    [Option('f', "file", HelpText = "Path to bytecode file", Required = true)]
     public string? FileName {get; set;}
 
     public override void Execute() {

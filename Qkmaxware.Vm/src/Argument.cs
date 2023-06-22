@@ -42,7 +42,7 @@ public class Int32Argument : Argument {
     public Int32Argument(string name) : base(name) {}
 
     public override VmValue ReadValue(BinaryReader reader) {
-        return new Int32Operand(reader.ReadInt32());
+        return Operand.From(reader.ReadInt32());
     }
 }
 
@@ -54,7 +54,7 @@ public class UInt32Argument : Argument {
     public UInt32Argument(string name) : base(name) {}
 
     public override VmValue ReadValue(BinaryReader reader) {
-        return new UInt32Operand(reader.ReadUInt32());
+        return Operand.From(reader.ReadUInt32());
     }
 }
 
@@ -66,6 +66,6 @@ public class Float32Argument : Argument {
     public Float32Argument(string name) : base(name) {}
 
     public override VmValue ReadValue(BinaryReader reader) {
-        return new Float32Operand(reader.ReadSingle());
+        return Operand.From(reader.ReadSingle());
     }
 }

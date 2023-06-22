@@ -16,10 +16,10 @@ public class DupBelow : Instruction {
     public override string Description => "Duplicate a value below the top of the stack given by the depth argument and place the result on the top of the stack.";
 
     public override void Action(VmValue[] args, RuntimeEnvironment runtime) {
-        var depth = (Int32Operand)args[0];
+        var depth = (Operand)args[0];
 
         // Remove from the stack until we get to the index we want
-        var stack = new Operand[depth.Value];
+        var stack = new Operand[depth.Int32];
         for (var i = 0; i < stack.Length; i++) {
             stack[i] = runtime.Stack.PopTop();
         }

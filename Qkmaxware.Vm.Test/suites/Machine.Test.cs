@@ -17,8 +17,8 @@ public class MachineTester {
 
         Assert.AreEqual(1, thread.Environment.Stack.SP);
         Assert.AreEqual(0, thread.Environment.Stack.FP);
-        Assert.IsInstanceOfType(thread.Environment.Stack.PeekTop(), typeof(Int32Operand));
-        var top = (Int32Operand)thread.Environment.Stack.PopTop();
-        Assert.AreEqual(7, top.Value);
+        //Assert.IsInstanceOfType(thread.Environment.Stack.PeekTop(), typeof(Int32Operand));
+        var top = thread.Environment.Stack.PopTop();
+        Assert.AreEqual(7, top.Int32);
     }
 }

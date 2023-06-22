@@ -15,9 +15,9 @@ public class RemI32 : Instruction {
     public override string Description => "Arithmetic remainder between 2 integers at the top of the operand stack";
 
     public override void Action(VmValue[] args, RuntimeEnvironment runtime) {
-        var rhs = (Int32Operand)runtime.Stack.PopTop();
-        var lhs = (Int32Operand)runtime.Stack.PopTop();
+        var rhs = runtime.Stack.PopTop();
+        var lhs = runtime.Stack.PopTop();
 
-        runtime.Stack.PushTop(new Int32Operand(lhs.Value % rhs.Value));
+        runtime.Stack.PushTop(Operand.From(lhs.Int32 % rhs.Int32));
     }
 }

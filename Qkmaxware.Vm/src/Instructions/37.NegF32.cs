@@ -15,8 +15,8 @@ public class NegF32 : Instruction {
     public override string Description => "Negation of the floating-point value on top of the operand stack";
 
     public override void Action(VmValue[] args, RuntimeEnvironment runtime) {
-        var lhs = (Float32Operand)runtime.Stack.PopTop();
+        var lhs = runtime.Stack.PopTop();
 
-        runtime.Stack.PushTop(new Float32Operand(-lhs.Value));
+        runtime.Stack.PushTop(Operand.From(-lhs.Float32));
     }
 }

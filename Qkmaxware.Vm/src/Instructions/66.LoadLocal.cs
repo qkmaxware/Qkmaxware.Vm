@@ -16,9 +16,9 @@ public class LoadLocal : Instruction {
     public override string Description => "In the given subprogram, load a value from a local variable onto the top of the operand stack";
 
     public override void Action(VmValue[] args, RuntimeEnvironment runtime) {
-        var index = (Int32Operand)args[0];
+        var index = (Operand)args[0];
         runtime.Stack.PushTop(
-            runtime.Stack.GetFrameRelative(index.Value + 4)
+            runtime.Stack.GetFrameRelative(index.Int32 + 4)
         );
     }
 }

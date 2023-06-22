@@ -6,9 +6,6 @@ namespace Qkmaxware.Vm.Terminal.Commands;
 
 [Verb("docs", HelpText = "View bytecode documentation")]
 public class Docs : BaseCommand {
-    [Option('f', "file", HelpText = "Path to bytecode file")]
-    public string? FileName {get; set;}
-
     public override void Execute() {
         var tab = "    ";
         Console.WriteLine("# Bytecode Instruction Set");

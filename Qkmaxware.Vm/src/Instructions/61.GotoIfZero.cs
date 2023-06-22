@@ -16,12 +16,12 @@ public class GotoIfZero : Instruction {
     public override string Description => "If the top of the stack is an integer equal to 0 then jump to another position in the program at PC + Offset.";
 
     public override void Action(VmValue[] args, RuntimeEnvironment runtime) {
-        var offset = ((Int32Operand)args[0]);
-        var condition = (Int32Operand)runtime.Stack.PopTop();
+        var offset = ((Operand)args[0]);
+        var condition = (Operand)runtime.Stack.PopTop();
         
-        if (condition.Value == 0) {
+        if (condition.Int32 == 0) {
             var now = runtime.PC;
-            var next = now + offset.Value;
+            var next = now + offset.Int32;
             runtime.PC = next;
         }
     }

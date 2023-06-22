@@ -6,8 +6,8 @@ namespace Qkmaxware.Vm.Test;
 public class PopTester {
     [TestMethod]
     public void TestAction() {
-        var lhs = new Int32Operand(3);
-        var rhs = new Int32Operand(4);
+        var lhs = Operand.From(3);
+        var rhs = Operand.From(4);
         var env = new RuntimeEnvironment();
         var args = new VmValue[] { };
 

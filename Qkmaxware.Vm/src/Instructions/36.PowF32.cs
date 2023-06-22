@@ -15,9 +15,9 @@ public class PowF32 : Instruction {
     public override string Description => "Arithmetic exponentiation between 2 floating-point values at the top of the operand stack";
 
     public override void Action(VmValue[] args, RuntimeEnvironment runtime) {
-        var rhs = (Float32Operand)runtime.Stack.PopTop();
-        var lhs = (Float32Operand)runtime.Stack.PopTop();
+        var rhs = runtime.Stack.PopTop();
+        var lhs = runtime.Stack.PopTop();
 
-        runtime.Stack.PushTop(new Float32Operand(MathF.Pow(lhs.Value, rhs.Value)));
+        runtime.Stack.PushTop(Operand.From(MathF.Pow(lhs.Float32, rhs.Float32)));
     }
 }

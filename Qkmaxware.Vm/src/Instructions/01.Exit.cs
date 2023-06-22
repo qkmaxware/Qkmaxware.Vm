@@ -16,7 +16,7 @@ public class Exit : Instruction {
     public override string Description => "Exit the program with the given status code. Status code 0 should indicate successful execution of the program.";
 
     public override void Action(VmValue[] args, RuntimeEnvironment runtime) {
-        var code = (Int32Operand)args[0];
-        throw new VmExitRequestException(code.Value);
+        var code = (Operand)args[0];
+        throw new VmExitRequestException(code.Int32);
     }
 }

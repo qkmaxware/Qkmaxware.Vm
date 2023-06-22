@@ -207,29 +207,29 @@ public class Asm1xParser : IAssemblyParser {
 
             var fmatch = floatPattern.Match(arg);
             if (fmatch.Success) {
-                parsed[i] = new Float32Operand(0);
+                parsed[i] = Operand.From(0.0f);
                 continue;
             }
             var umatch = uintPattern.Match(arg);
             if (umatch.Success) {
-                parsed[i] = new UInt32Operand(0);
+                parsed[i] = Operand.From(0U);
                 continue;
             }
             var imatch = intPattern.Match(arg);
             if (imatch.Success) {
-                parsed[i] = new Int32Operand(0);
+                parsed[i] = Operand.From(0);
                 continue;
             }
 
             var lmatch = labelNameRegex.Match(arg);
             if (lmatch.Success) {
                 // goto .my_func
-                parsed[i] = new Int32Operand(0);
+                parsed[i] = Operand.From(0);
                 continue;
             }
             var cmatch = constantNameRegex.Match(arg);
             if (cmatch.Success) {
-                parsed[i] = new Int32Operand(0);
+                parsed[i] = Operand.From(0);
                 continue;
             }
 
@@ -248,17 +248,17 @@ public class Asm1xParser : IAssemblyParser {
 
             var fmatch = floatPattern.Match(arg);
             if (fmatch.Success) {
-                parsed[i] =  new Float32Operand(float.Parse(fmatch.Value.Replace("f", string.Empty)));
+                parsed[i] =  Operand.From(float.Parse(fmatch.Value.Replace("f", string.Empty)));
                 continue;
             }
             var umatch = uintPattern.Match(arg);
             if (umatch.Success) {
-                parsed[i] =  new UInt32Operand(uint.Parse(umatch.Value.Replace("u", string.Empty).Replace("U", string.Empty)));
+                parsed[i] =  Operand.From(uint.Parse(umatch.Value.Replace("u", string.Empty).Replace("U", string.Empty)));
                 continue;
             }
             var imatch = intPattern.Match(arg);
             if (imatch.Success) {
-                parsed[i] = new Int32Operand(int.Parse(imatch.Value));
+                parsed[i] = Operand.From(int.Parse(imatch.Value));
                 continue;
             }
 
@@ -268,7 +268,7 @@ public class Asm1xParser : IAssemblyParser {
                 var constId = lmatch.Groups["id"].Value;
                 if (!labels.ContainsKey(constId))
                     throw new MissingMemberException($"No label defined with name '{constId}'.");
-                parsed[i] = new Int32Operand((int)(labels[constId].CodePosition - positionAfterInstruction));
+                parsed[i] = Operand.From((int)(labels[constId].CodePosition - positionAfterInstruction));
                 continue;
             }
             var cmatch = constantNameRegex.Match(arg);
@@ -276,7 +276,7 @@ public class Asm1xParser : IAssemblyParser {
                 var constId = cmatch.Groups["id"].Value;
                 if (!consts.ContainsKey(constId))
                     throw new MissingMemberException($"No constant defined with name '{constId}'.");
-                parsed[i] = new Int32Operand(consts[constId].PoolIndex);
+                parsed[i] = Operand.From(consts[constId].PoolIndex);
                 continue;
             }
 

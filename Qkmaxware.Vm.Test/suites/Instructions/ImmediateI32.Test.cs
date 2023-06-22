@@ -8,7 +8,7 @@ public class ImmediateI32Tester {
     public void TestAction() {
         var value = 4;
         var env = new RuntimeEnvironment();
-        var args = new VmValue[] { new Int32Operand(value) };
+        var args = new VmValue[] { Operand.From(value) };
 
         var instr = new ImmediateI32();
         instr.Action(args, env);
@@ -18,7 +18,7 @@ public class ImmediateI32Tester {
         Assert.AreEqual(false, env.Stack.IsEmpty);
         Assert.IsNotNull(env.Stack.PeekTop());
         var result = env.Stack.PopTop();
-        Assert.IsInstanceOfType(result, typeof(Int32Operand));
-        Assert.AreEqual(value, ((Int32Operand)result).Value);
+        //Assert.IsInstanceOfType(result, typeof(Int32Operand));
+        Assert.AreEqual(value, (result).Int32);
     }
 }

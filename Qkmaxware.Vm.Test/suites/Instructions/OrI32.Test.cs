@@ -12,8 +12,8 @@ public class OrI32Tester {
         var env = new RuntimeEnvironment();
         var args = new VmValue[] { };
 
-        new ImmediateI32().Action(new VmValue[]{ new Int32Operand(lhs) }, env);
-        new ImmediateI32().Action(new VmValue[]{ new Int32Operand(rhs) }, env);
+        new ImmediateI32().Action(new VmValue[]{ Operand.From(lhs) }, env);
+        new ImmediateI32().Action(new VmValue[]{ Operand.From(rhs) }, env);
 
         var instr = new OrI32();
         instr.Action(args, env);
@@ -23,7 +23,7 @@ public class OrI32Tester {
         Assert.AreEqual(false, env.Stack.IsEmpty);
         Assert.IsNotNull(env.Stack.PeekTop());
         var result = env.Stack.PopTop();
-        Assert.IsInstanceOfType(result, typeof(Int32Operand));
-        Assert.AreEqual(computed, ((Int32Operand)result).Value);
+        //Assert.IsInstanceOfType(result, typeof(Int32Operand));
+        Assert.AreEqual(computed, (result).Int32);
     }
 }

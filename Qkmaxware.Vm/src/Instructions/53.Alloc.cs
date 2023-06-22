@@ -15,9 +15,9 @@ public class Alloc : Instruction {
     public override string Description => "Allocate a contiguous block of memory in the heap.";
 
     public override void Action(VmValue[] args, RuntimeEnvironment runtime) {
-        var size = (Int32Operand)runtime.Stack.PopTop();
-        var address = runtime.Heap.Reserve(size.Value);
+        var size = runtime.Stack.PopTop();
+        var address = runtime.Heap.Reserve(size.Int32);
 
-        runtime.Stack.PushTop(new HeapDataPointerOperand(address, runtime.Heap));
+        runtime.Stack.PushTop(Operand.From(new Pointer(PointerType.HeapAddress, address)));
     }
 }

@@ -9,7 +9,7 @@ public partial class ModuleBuilder {
     }
 
     public void Exit(int status) {
-        this.AddInstruction("exit", new Int32Operand(status));
+        this.AddInstruction("exit", Operand.From(status));
     }
 
     public void SwapStackTop() {
@@ -21,10 +21,10 @@ public partial class ModuleBuilder {
     }
 
     public void DuplicateStackTop(int elements) {
-        this.AddInstruction("dup_block", new Int32Operand(elements));
+        this.AddInstruction("dup_block", Operand.From(elements));
     }
     public void DuplicateStackElement(int position) {
-        this.AddInstruction("dup_below", new Int32Operand(position));
+        this.AddInstruction("dup_below", Operand.From(position));
     }
 
     public void PopStackTop() {
@@ -32,23 +32,23 @@ public partial class ModuleBuilder {
     }
 
     public void PopStackElements(int elements) {
-        this.AddInstruction("pop_n", new Int32Operand(elements));
+        this.AddInstruction("pop_n", Operand.From(elements));
     }
 
     public void PushConstant(int constantPoolIndex) {
-        this.AddInstruction("load_const", new Int32Operand(constantPoolIndex));
+        this.AddInstruction("load_const", Operand.From(constantPoolIndex));
     }
 
     public void PushLocal(int localIndex) {
-        this.AddInstruction("load_local", new Int32Operand(localIndex));
+        this.AddInstruction("load_local", Operand.From(localIndex));
     }
 
     public void StoreLocal(int localIndex) {
-        this.AddInstruction("store_local", new Int32Operand(localIndex));
+        this.AddInstruction("store_local", Operand.From(localIndex));
     }
 
     public void PushInt32(int value) {
-        this.AddInstruction("immediate_i32", new Int32Operand(value));
+        this.AddInstruction("immediate_i32", Operand.From(value));
     }
 
     public void AddInt32() => this.AddInstruction("add_i32");
@@ -64,8 +64,8 @@ public partial class ModuleBuilder {
     public void XorInt32() => this.AddInstruction("xor_i32");
     public void ComplementInt32() => this.AddInstruction("complement_i32");
 
-    public void PushUInt32(int value) {
-        this.AddInstruction("immediate_u32", new Int32Operand(value));
+    public void PushUInt32(uint value) {
+        this.AddInstruction("immediate_u32", Operand.From(value));
     }
     
     public void AddUInt32() => this.AddInstruction("add_u32");
@@ -78,8 +78,8 @@ public partial class ModuleBuilder {
     public void OrUInt32() => this.AddInstruction("or_u32");
     public void XorUInt32() => this.AddInstruction("xor_u32");
 
-    public void PushFloat32(int value) {
-        this.AddInstruction("immediate_f32", new Int32Operand(value));
+    public void PushFloat32(float value) {
+        this.AddInstruction("immediate_f32", Operand.From(value));
     }
 
     public void AddFloat32() => this.AddInstruction("add_f32");
@@ -92,56 +92,56 @@ public partial class ModuleBuilder {
 
     public void ObjectSize() => this.AddInstruction("sizeof");
     public void ArrayLength() => this.AddInstruction("len");
-    public void GetArrayElement(int index) => this.AddInstruction("get_element", new Int32Operand(index));
+    public void GetArrayElement(int index) => this.AddInstruction("get_element", Operand.From(index));
 
 
     public void Goto(long anchor) {
         this.AddInstruction(
             "goto", 
-            new Int32Operand((int)(anchor - (this.Anchor() + 5)))
+            Operand.From((int)(anchor - (this.Anchor() + 5)))
         );
     }
     public void GotoIfStackTopZero(long anchor) {
         this.AddInstruction(
             "goto_if_zero", 
-            new Int32Operand((int)(anchor - (this.Anchor() + 5)))
+            Operand.From((int)(anchor - (this.Anchor() + 5)))
         );
     }
     public void GotoIfStackTopNotZero(long anchor) {
         this.AddInstruction(
             "goto_if_nzero", 
-            new Int32Operand((int)(anchor - (this.Anchor() + 5)))
+            Operand.From((int)(anchor - (this.Anchor() + 5)))
         );
     }
 
     public void Goto(Label l) {
         this.AddInstruction(
             "goto", 
-            new Int32Operand((int)(l.CodePosition - (this.Anchor() + 5)))
+            Operand.From((int)(l.CodePosition - (this.Anchor() + 5)))
         );
     }
     public void GotoIfStackTopZero(Label l) {
         this.AddInstruction(
             "goto_if_zero", 
-            new Int32Operand((int)(l.CodePosition - (this.Anchor() + 5)))
+            Operand.From((int)(l.CodePosition - (this.Anchor() + 5)))
         );
     }
     public void GotoIfStackTopNotZero(Label l) {
         this.AddInstruction(
             "goto_if_nzero", 
-            new Int32Operand((int)(l.CodePosition - (this.Anchor() + 5)))
+            Operand.From((int)(l.CodePosition - (this.Anchor() + 5)))
         );
     }
 
     public void Call(Label l, int argc) {
-        this.AddInstruction("call", new VmValue[]{new Int32Operand((int)(l.CodePosition - (this.Anchor() + 9))), new Int32Operand(argc)});
+        this.AddInstruction("call", new VmValue[]{Operand.From((int)(l.CodePosition - (this.Anchor() + 9))), Operand.From(argc)});
     }
     public void Call(int offset, int argc) {
-        this.AddInstruction("call", new VmValue[]{new Int32Operand(offset), new Int32Operand(argc)});
+        this.AddInstruction("call", new VmValue[]{Operand.From(offset), Operand.From(argc)});
     }
 
     public void PushArgument(int argIndex) {
-        this.AddInstruction("load_arg", new Int32Operand(argIndex));
+        this.AddInstruction("load_arg", Operand.From(argIndex));
     }
 
     public void Return() {

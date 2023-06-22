@@ -37,21 +37,21 @@ public class CallTester {
         #nullable disable
         thread.RunNext();
         Assert.AreEqual(4+2+1, thread.Environment.Stack.SP);
-        Assert.IsInstanceOfType(thread.Environment.Stack.PeekTop(), typeof(Int32Operand));
-        var arg_1 = (Int32Operand)thread.Environment.Stack.PeekTop();
-        Assert.AreEqual(3, arg_1.Value);
+        //Assert.IsInstanceOfType(thread.Environment.Stack.PeekTop(), typeof(Int32Operand));
+        var arg_1 = thread.Environment.Stack.PeekTop();
+        Assert.AreEqual(3, arg_1.Int32);
 
         thread.RunNext();
         Assert.AreEqual(4+2+2, thread.Environment.Stack.SP);
-        Assert.IsInstanceOfType(thread.Environment.Stack.PeekTop(), typeof(Int32Operand));
-        var arg_2 = (Int32Operand)thread.Environment.Stack.PeekTop();
-        Assert.AreEqual(4, arg_2.Value);
+        //Assert.IsInstanceOfType(thread.Environment.Stack.PeekTop(), typeof(Int32Operand));
+        var arg_2 = thread.Environment.Stack.PeekTop();
+        Assert.AreEqual(4, arg_2.Int32);
 
         thread.RunNext();
         Assert.AreEqual(4+2+1, thread.Environment.Stack.SP);
-        Assert.IsInstanceOfType(thread.Environment.Stack.PeekTop(), typeof(Int32Operand));
-        var res = (Int32Operand)thread.Environment.Stack.PeekTop();
-        Assert.AreEqual(3 + 4, res.Value);
+        //Assert.IsInstanceOfType(thread.Environment.Stack.PeekTop(), typeof(Int32Operand));
+        var res = thread.Environment.Stack.PeekTop();
+        Assert.AreEqual(3 + 4, res.Int32);
 
         thread.RunNext();
         Assert.AreEqual(2, thread.Environment.Stack.SP);
@@ -101,28 +101,28 @@ public class CallTester {
         #nullable disable
         thread.RunNext();
         Assert.AreEqual(4+2+1, thread.Environment.Stack.SP);
-        Assert.IsInstanceOfType(thread.Environment.Stack.PeekTop(), typeof(Int32Operand));
-        var arg_1 = (Int32Operand)thread.Environment.Stack.PeekTop();
-        Assert.AreEqual(3, arg_1.Value);
+        //Assert.IsInstanceOfType(thread.Environment.Stack.PeekTop(), typeof(Int32Operand));
+        var arg_1 = thread.Environment.Stack.PeekTop();
+        Assert.AreEqual(3, arg_1.Int32);
 
         thread.RunNext();
         Assert.AreEqual(4+2+2, thread.Environment.Stack.SP);
-        Assert.IsInstanceOfType(thread.Environment.Stack.PeekTop(), typeof(Int32Operand));
-        var arg_2 = (Int32Operand)thread.Environment.Stack.PeekTop();
-        Assert.AreEqual(4, arg_2.Value);
+        //Assert.IsInstanceOfType(thread.Environment.Stack.PeekTop(), typeof(Int32Operand));
+        var arg_2 = thread.Environment.Stack.PeekTop();
+        Assert.AreEqual(4, arg_2.Int32);
 
         thread.RunNext();
         Assert.AreEqual(4+2+1, thread.Environment.Stack.SP);
-        Assert.IsInstanceOfType(thread.Environment.Stack.PeekTop(), typeof(Int32Operand));
-        var res = (Int32Operand)thread.Environment.Stack.PeekTop();
-        Assert.AreEqual(3 + 4, res.Value);
+        //Assert.IsInstanceOfType(thread.Environment.Stack.PeekTop(), typeof(Int32Operand));
+        var res = thread.Environment.Stack.PeekTop();
+        Assert.AreEqual(3 + 4, res.Int32);
 
         thread.RunNext();
         Assert.AreEqual(3, thread.Environment.Stack.SP);
         Assert.AreEqual(0, thread.Environment.Stack.FP);
-        Assert.IsInstanceOfType(thread.Environment.Stack.PeekTop(), typeof(Int32Operand));
-        var ret = (Int32Operand)thread.Environment.Stack.PeekTop();
-        Assert.AreEqual(3 + 4, ret.Value);
+        //Assert.IsInstanceOfType(thread.Environment.Stack.PeekTop(), typeof(Int32Operand));
+        var ret = thread.Environment.Stack.PeekTop();
+        Assert.AreEqual(3 + 4, ret.Int32);
         #nullable restore
     }
 }

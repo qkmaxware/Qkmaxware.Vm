@@ -15,8 +15,8 @@ public class Putchar : Instruction {
     public override string Description => "Treat the element at the top of the stack as a character and print it to the standard output device.";
 
     public override void Action(VmValue[] args, RuntimeEnvironment runtime) {
-        var ptr = (Int32Operand)runtime.Stack.PopTop();
-        var character = (char)ptr.Value;
+        var ptr = runtime.Stack.PopTop();
+        var character = (char)ptr.Int32;
         runtime.Host.StdOut.Write(character);
     }
 }

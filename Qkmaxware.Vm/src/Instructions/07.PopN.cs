@@ -16,7 +16,7 @@ public class PopN : Instruction {
     public override string Description => "Remove the given amount of values from the top of the operand stack.";
 
     public override void Action(VmValue[] args, RuntimeEnvironment runtime) {
-        var size = Math.Max(((Int32Operand)args[0]).Value, 0);
+        var size = Math.Max(((Operand)args[0]).Int32, 0);
 
         for (var i = 0; i < size; i++) {
             runtime.Stack.PopTop();

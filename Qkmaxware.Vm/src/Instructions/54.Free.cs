@@ -15,7 +15,9 @@ public class Free : Instruction {
     public override string Description => "Free a reserved block of memory in the heap.";
 
     public override void Action(VmValue[] args, RuntimeEnvironment runtime) {
-        var size = (HeapDataPointerOperand)runtime.Stack.PopTop();
-        runtime.Heap.Free(size.Address);
+        var address = runtime.Stack.PopTop().Pointer32;
+        if (!address.IsHeapAddress())
+            throw new NotImplementedException("Cannot free memory no on the heap");
+        runtime.Heap.Free(address.IntValue);
     }
 }

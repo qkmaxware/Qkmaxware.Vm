@@ -15,9 +15,9 @@ public class LeftShiftU32 : Instruction {
     public override string Description => "Left shift the elements of one unsigned integer by another";
 
     public override void Action(VmValue[] args, RuntimeEnvironment runtime) {
-        var rhs = (UInt32Operand)runtime.Stack.PopTop();
-        var lhs = (UInt32Operand)runtime.Stack.PopTop();
+        var rhs = runtime.Stack.PopTop();
+        var lhs = runtime.Stack.PopTop();
 
-        runtime.Stack.PushTop(new UInt32Operand(lhs.Value << (int)rhs.Value)); // TODO look at this later
+        runtime.Stack.PushTop(Operand.From(lhs.UInt32 << (int)rhs.UInt32)); // TODO look at this later
     }
 }

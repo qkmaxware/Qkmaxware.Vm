@@ -12,14 +12,14 @@ public class SizeofTester {
         var str = "Hello";
         var constant = new StringConstant(ConstantInfo.Utf32, str);
         env.ConstantPool.Add(constant);
-        env.Stack.PushTop(new ConstantPoolArrayPointerOperand(constant));
+        env.Stack.PushTop(Operand.From(new Pointer(PointerType.ConstantPoolIndex, constant.PoolIndex)));
 
         var instr = new Sizeof();
         instr.Action(args, env);
         
         Assert.AreEqual(1, env.Stack.SP);
-        Assert.IsInstanceOfType(env.Stack.PeekTop(), typeof(Int32Operand));
-        var top = (Int32Operand)env.Stack.PopTop();
-        Assert.AreEqual(str.Length * 4, top.Value);
+        //Assert.IsInstanceOfType(env.Stack.PeekTop(), typeof(Int32Operand));
+        var top = env.Stack.PopTop();
+        Assert.AreEqual(str.Length * 4, top.Int32);
     }
 }

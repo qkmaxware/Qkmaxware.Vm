@@ -22,9 +22,9 @@ public class SubI32 : Instruction {
          *         |-------|    |-------|
         */
 
-        var rhs = (Int32Operand)runtime.Stack.PopTop();
-        var lhs = (Int32Operand)runtime.Stack.PopTop();
+        var rhs = runtime.Stack.PopTop();
+        var lhs = runtime.Stack.PopTop();
 
-        runtime.Stack.PushTop(new Int32Operand(lhs.Value - rhs.Value));
+        runtime.Stack.PushTop(Operand.From(lhs.Int32 - rhs.Int32));
     }
 }

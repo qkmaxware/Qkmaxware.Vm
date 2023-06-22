@@ -66,8 +66,8 @@ public string Program2 = @"use asm 1.0
         var thread = vm.LoadProgram(module);
         thread.RunUntilComplete();
         Assert.AreEqual(false, thread.Environment.Stack.IsEmpty);
-        Assert.IsInstanceOfType(thread.Environment.Stack.PeekTop(), typeof(Float32Operand));
-        Assert.AreEqual(3.1415926f * 12*12, ((Float32Operand)thread.Environment.Stack.PopTop()).Value, 0.001f);
+        //Assert.IsInstanceOfType(thread.Environment.Stack.PeekTop(), typeof(Float32Operand));
+        Assert.AreEqual(3.1415926f * 12*12, (thread.Environment.Stack.PopTop()).Float32, 0.001f);
     }
 
 

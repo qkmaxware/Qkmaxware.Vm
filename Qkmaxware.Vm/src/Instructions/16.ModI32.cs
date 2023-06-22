@@ -15,16 +15,16 @@ public class ModI32 : Instruction {
     public override string Description => "Arithmetic modulus between 2 integers at the top of the operand stack";
 
     public override void Action(VmValue[] args, RuntimeEnvironment runtime) {
-        var rhs = (Int32Operand)runtime.Stack.PopTop();
-        var lhs = (Int32Operand)runtime.Stack.PopTop();
+        var rhs = runtime.Stack.PopTop();
+        var lhs = runtime.Stack.PopTop();
 
-        if (rhs.Value == -1) {
-            runtime.Stack.PushTop(new Int32Operand(0));
+        if (rhs.Int32 == -1) {
+            runtime.Stack.PushTop(Operand.From(0));
             return;
         }
 
-        var mod = lhs.Value - (int)Math.Floor((double)lhs.Value / rhs.Value) * rhs.Value;
+        var mod = lhs.Int32 - (int)Math.Floor((double)lhs.Int32 / rhs.Int32) * rhs.Int32;
 
-        runtime.Stack.PushTop(new Int32Operand(mod));
+        runtime.Stack.PushTop(Operand.From(mod));
     }
 }

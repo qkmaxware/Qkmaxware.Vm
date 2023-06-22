@@ -20,7 +20,7 @@ public class DupBlock : Instruction {
          * DupN(2)
          * [A,B,C,D] -> [A,B,C,D,C,D] 
         */
-        var size = Math.Max(((Int32Operand)args[0]).Value, 0);
+        var size = Math.Max(((Operand)args[0]).Int32, 0);
         var block = new Operand[size];
         for (var i = 0; i < size; i++) {
             var top = runtime.Stack.PopTop();

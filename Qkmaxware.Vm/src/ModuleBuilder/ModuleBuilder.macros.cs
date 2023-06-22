@@ -46,7 +46,7 @@ public partial class ModuleBuilder {
         this.AddInstruction("sub_i32");                       // [string_ptr, string_length, index + 1, condition]
         this.AddInstruction(
             "goto_if_nzero", 
-            new Int32Operand((int)(print_loop - (this.Anchor() + 5)))
+            Operand.From((int)(print_loop - (this.Anchor() + 5)))
         );                                          // [string_ptr, string_length, index + 1]
 
         // Cleanup the stack

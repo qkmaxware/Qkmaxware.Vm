@@ -16,7 +16,7 @@ public class ImmediateU32 : Instruction {
     public override string Description => "Push an immediate unsigned integer value on top of the operand stack.";
 
     public override void Action(VmValue[] args, RuntimeEnvironment runtime) {
-        var immediate = (UInt32Operand)args[0];
+        var immediate = (Operand)args[0];
         runtime.Stack.PushTop(immediate);
     }
 }

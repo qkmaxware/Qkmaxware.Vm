@@ -15,9 +15,9 @@ public class RightShiftLogicalI32 : Instruction {
     public override string Description => "Logical right shift the elements of one integer by another";
 
     public override void Action(VmValue[] args, RuntimeEnvironment runtime) {
-        var rhs = (Int32Operand)runtime.Stack.PopTop();
-        var lhs = (Int32Operand)runtime.Stack.PopTop();
+        var rhs = (Operand)runtime.Stack.PopTop();
+        var lhs = (Operand)runtime.Stack.PopTop();
 
-        runtime.Stack.PushTop(new Int32Operand(lhs.Value >>> rhs.Value));
+        runtime.Stack.PushTop(Operand.From(lhs.Int32 >>> rhs.Int32));
     }
 }

@@ -16,9 +16,9 @@ public class LoadConst : Instruction {
     public override string Description => "Push a value from the constant pool onto the top of the stack.";
 
     public override void Action(VmValue[] args, RuntimeEnvironment runtime) {
-        var index = (Int32Operand)args[0];
+        var index = (Operand)args[0];
         runtime.Stack.PushTop(
-            runtime.ConstantPool[index.Value].LoadOperand()
+            runtime.ConstantPool[index.Int32].LoadOperand()
         );
     }
 }

@@ -9,6 +9,17 @@ public abstract class ConstantData {
     /// </summary>
     /// <value></value>
     public int PoolIndex {get; internal set;}
+
+    /// <summary>
+    /// Number of bytes needed to represent this data
+    /// </summary>
+    /// <returns>number of bytes</returns>
+    public abstract int ByteCount();
+    /// <summary>
+    /// Number of elements in this data
+    /// </summary>
+    /// <returns>element count</returns>
+    public abstract int ElementCount();
     
     /// <summary>
     /// Type information for this constant
@@ -43,6 +54,8 @@ public abstract class ConstantData {
 /// Constant composed of primitive data
 /// </summary>
 public abstract class PrimitiveConstant : ConstantData {
+    public override int ByteCount() => ((PrimitiveConstantType)this.TypeInfo).SizeBytes();
+    public override int ElementCount() => 1;
     public PrimitiveConstant(PrimitiveConstantType type) : base(type) {}
 }
 
@@ -55,7 +68,7 @@ public class Int32Constant : PrimitiveConstant {
     /// </summary>
     /// <value></value>
     public Int32 Value {get; private set;}
-    
+
     public Int32Constant(Int32 value) : base(ConstantInfo.Int32) {
         this.Value = value;
     }
@@ -64,7 +77,7 @@ public class Int32Constant : PrimitiveConstant {
     /// Operand to add to the stack when this constant is loaded from memory
     /// </summary>
     /// <returns>stack operand</returns>
-    public override Operand LoadOperand() => new Int32Operand(this.Value);
+    public override Operand LoadOperand() => (this.Value);
 
     /// <summary>
     /// Encode this constant to the given writer
@@ -90,7 +103,7 @@ public class UInt32Constant : PrimitiveConstant {
     /// </summary>
     /// <value></value>
     public UInt32 Value {get; private set;}
-    
+
     public UInt32Constant(UInt32 value) : base(ConstantInfo.UInt32) {
         this.Value = value;
     }
@@ -99,7 +112,7 @@ public class UInt32Constant : PrimitiveConstant {
     /// Operand to add to the stack when this constant is loaded from memory
     /// </summary>
     /// <returns>stack operand</returns>
-    public override Operand LoadOperand() => new UInt32Operand(this.Value);
+    public override Operand LoadOperand() => (this.Value);
 
     /// <summary>
     /// Encode this constant to the given writer
@@ -125,7 +138,7 @@ public class Float32Constant : PrimitiveConstant {
     /// </summary>
     /// <value></value>
     public Single Value {get; private set;}
-    
+
     public Float32Constant(Single value) : base(ConstantInfo.Float32) {
         this.Value = value;
     }
@@ -134,7 +147,7 @@ public class Float32Constant : PrimitiveConstant {
     /// Operand to add to the stack when this constant is loaded from memory
     /// </summary>
     /// <returns>stack operand</returns>
-    public override Operand LoadOperand() => new Float32Operand(this.Value);
+    public override Operand LoadOperand() => (this.Value);
 
     /// <summary>
     /// Encode this constant to the given writer
@@ -157,8 +170,6 @@ public class Float32Constant : PrimitiveConstant {
 public abstract class ArrayConstant : ConstantData {
     public ArrayConstant(ArrayConstantType type) : base(type) {}
 
-    public abstract int CountBytes();
-    public abstract int CountElements();
     public abstract Operand GetElementAt(int index);
 }
 
@@ -185,12 +196,12 @@ public class PrimitiveArrayConstant : ArrayConstant  {
         }
     }
 
-    public override Operand LoadOperand() => new ConstantPoolArrayPointerOperand(this);
-    public override int CountBytes() {
-        return this.CountElements() * ((ArrayConstantType)this.TypeInfo).ElementType.SizeBytes();
+    public override Operand LoadOperand() => Operand.From(new Pointer(PointerType.ConstantPoolIndex, this.PoolIndex));
+    public override int ByteCount() {
+        return this.ElementCount() * ((ArrayConstantType)this.TypeInfo).ElementType.SizeBytes();
     }
 
-    public override int CountElements() => this.operands.Length;
+    public override int ElementCount() => this.operands.Length;
 
     public override Operand GetElementAt(int index) => this.operands[index].LoadOperand();
 
@@ -220,7 +231,7 @@ public class StringConstant : ArrayConstant {
     /// Operand to add to the stack when this constant is loaded from memory
     /// </summary>
     /// <returns>stack operand</returns>
-    public override Operand LoadOperand() => new ConstantPoolArrayPointerOperand(this);
+    public override Operand LoadOperand() => Operand.From(new Pointer(PointerType.ConstantPoolIndex, this.PoolIndex));
 
     /// <summary>
     /// Encode this constant to the given writer
@@ -235,11 +246,11 @@ public class StringConstant : ArrayConstant {
 
 
     private int bytes;
-    public override int CountBytes() => bytes;
+    public override int ByteCount() => bytes;
 
-    public override int CountElements() => this.Value.Length;
+    public override int ElementCount() => this.Value.Length;
 
-    public override Operand GetElementAt(int index) => new Int32Operand(this.Value[index]);
+    public override Operand GetElementAt(int index) => Operand.From(this.Value[index]);
 
     /// <summary>
     /// Print the value of this constant as a string

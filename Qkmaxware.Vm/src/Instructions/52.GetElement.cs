@@ -15,8 +15,16 @@ public class GetElement : Instruction {
     public override string Description => "Using a pointer to an array at the top of the operand stack, fetch s particular element in that array and place that value on top of the operand stack.";
 
     public override void Action(VmValue[] args, RuntimeEnvironment runtime) {
-        var offset = (Int32Operand)runtime.Stack.PopTop();
-        var ptr = (ArrayPointerOperand)runtime.Stack.PopTop();
-        runtime.Stack.PushTop(ptr.GetElementAt(offset.Value));
+        var offset = (Operand)runtime.Stack.PopTop();
+        var ptr = runtime.Stack.PopTop().Pointer32;
+        if (ptr.IsConstantPoolIndex()) {
+            var element = (ArrayConstant)runtime.ConstantPool[ptr.IntValue];
+            runtime.Stack.PushTop(element.GetElementAt(offset.Int32));
+        } else if (ptr.IsHeapAddress()) {
+            var index = ptr.IntValue + offset.Int32;
+            runtime.Stack.PushTop(Operand.From(runtime.Heap.ReadWord32(index)));
+        } else {
+            throw new NotImplementedException();
+        }
     }
 }

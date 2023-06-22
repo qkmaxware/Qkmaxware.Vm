@@ -27,18 +27,18 @@ public class Call : Instruction {
         var prev_pc = runtime.PC;
         
         // Store Argument Count
-        var argc = ((Int32Operand)args[1]);
+        var argc = ((Operand)args[1]);
         
         // Preserve old values
         runtime.Stack.FP = prev_sp;
         runtime.Stack.PushTop(argc);
-        runtime.Stack.PushTop(new Int32Operand((int)prev_pc));
-        runtime.Stack.PushTop(new Int32Operand(prev_fp));
-        runtime.Stack.PushTop(new Int32Operand(prev_sp));
+        runtime.Stack.PushTop(Operand.From((uint)prev_pc));
+        runtime.Stack.PushTop(Operand.From(prev_fp));
+        runtime.Stack.PushTop(Operand.From(prev_sp));
 
         // Jump
-        var offset = ((Int32Operand)args[0]);
-        var next = prev_pc + offset.Value;
+        var offset = ((Operand)args[0]);
+        var next = prev_pc + offset.Int32;
         runtime.PC = next;
     }
 }

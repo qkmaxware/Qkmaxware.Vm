@@ -13,17 +13,17 @@ public class OperandStackTester {
         Assert.AreEqual(0, stack.FP);
         Assert.IsNull(stack.PeekTop());
         // Manipulation assertions
-        stack.PushTop(new Int32Operand(value));
+        stack.PushTop(Operand.From(value));
         Assert.AreEqual(false, stack.IsEmpty);
         Assert.AreEqual(1, stack.SP);
         Assert.AreEqual(0, stack.FP);
         var peeked = stack.PeekTop();
         Assert.IsNotNull(peeked);
-        Assert.IsInstanceOfType(peeked, typeof(Int32Operand));
+        //.IsInstanceOfType(peeked, typeof(Int32Operand));
         var popped = stack.PopTop();
         Assert.AreEqual(peeked, popped);
-        Assert.AreEqual(value, ((Int32Operand)peeked).Value);
-        Assert.AreEqual(value, ((Int32Operand)popped).Value);
+        Assert.AreEqual(value, (peeked).Int32);
+        Assert.AreEqual(value, (popped).Int32);
         Assert.AreEqual(true, stack.IsEmpty);
         Assert.AreEqual(0, stack.SP);
         Assert.AreEqual(0, stack.FP);
@@ -33,10 +33,10 @@ public class OperandStackTester {
     [TestMethod]
     public void TestFrame() {
         var stack = new OperandStack();
-        stack.PushTop(new Int32Operand(1));
-        stack.PushTop(new Int32Operand(2));
-        stack.PushTop(new Int32Operand(3)); // FP here
-        stack.PushTop(new Int32Operand(4));
+        stack.PushTop(Operand.From(1));
+        stack.PushTop(Operand.From(2));
+        stack.PushTop(Operand.From(3)); // FP here
+        stack.PushTop(Operand.From(4));
         // Default state assertions
         Assert.AreEqual(false, stack.IsEmpty);
         Assert.AreEqual(4, stack.SP);
@@ -55,26 +55,26 @@ public class OperandStackTester {
         // Test local loading
         var local = stack.GetFrameRelative(0);
         Assert.IsNotNull(local);
-        Assert.IsInstanceOfType(local, typeof(Int32Operand));
-        Assert.AreEqual(3, ((Int32Operand)local).Value);
+        //Assert.IsInstanceOfType(local, typeof(Int32Operand));
+        Assert.AreEqual(3, (local).Int32);
         local = stack.GetFrameRelative(1);
         Assert.IsNotNull(local);
-        Assert.IsInstanceOfType(local, typeof(Int32Operand));
-        Assert.AreEqual(4, ((Int32Operand)local).Value);
+        //Assert.IsInstanceOfType(local, typeof(Int32Operand));
+        Assert.AreEqual(4, (local).Int32);
         local = stack.GetFrameRelative(-1);
         Assert.IsNotNull(local);
-        Assert.IsInstanceOfType(local, typeof(Int32Operand));
-        Assert.AreEqual(2, ((Int32Operand)local).Value);
+        //Assert.IsInstanceOfType(local, typeof(Int32Operand));
+        Assert.AreEqual(2, (local).Int32);
         Assert.ThrowsException<IndexOutOfRangeException>(() => stack.GetFrameRelative(100));
         Assert.ThrowsException<IndexOutOfRangeException>(() => stack.GetFrameRelative(-100));
         // Test local saving
-        var float_val = 911;
-        stack.SetFrameRelative(0, new Float32Operand(float_val));
+        var float_val = 911f;
+        stack.SetFrameRelative(0, Operand.From(float_val));
         local = stack.GetFrameRelative(0);
-        Assert.IsInstanceOfType(local, typeof(Float32Operand));
-        Assert.AreEqual(float_val, ((Float32Operand)local).Value);
-        Assert.ThrowsException<IndexOutOfRangeException>(() => stack.SetFrameRelative(100, new Float32Operand(float_val)));
-        Assert.ThrowsException<IndexOutOfRangeException>(() => stack.SetFrameRelative(-100, new Float32Operand(float_val)));
+        //Assert.IsInstanceOfType(local, typeof(Float32Operand));
+        Assert.AreEqual(float_val, (local).Float32);
+        Assert.ThrowsException<IndexOutOfRangeException>(() => stack.SetFrameRelative(100, Operand.From(float_val)));
+        Assert.ThrowsException<IndexOutOfRangeException>(() => stack.SetFrameRelative(-100, Operand.From(float_val)));
     }
 
 }

@@ -29,10 +29,10 @@ public class LoadArg : Instruction {
     public override string Description => "In the given subprogram, load a value from a subprogram argument onto the top of the operand stack";
 
     public override void Action(VmValue[] args, RuntimeEnvironment runtime) {
-        var index = (Int32Operand)args[0];
-        var argc = (Int32Operand)runtime.Stack.GetFrameRelative(0);
+        var index = (Operand)args[0];
+        var argc = runtime.Stack.GetFrameRelative(0);
         runtime.Stack.PushTop(
-            runtime.Stack.GetFrameRelative(-argc.Value + index.Value)
+            runtime.Stack.GetFrameRelative(-argc.Int32 + index.Int32)
         );
     }
 }

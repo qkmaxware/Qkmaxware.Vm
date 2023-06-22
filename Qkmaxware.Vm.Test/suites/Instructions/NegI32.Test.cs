@@ -11,7 +11,7 @@ public class NegI32Tester {
         var env = new RuntimeEnvironment();
         var args = new VmValue[] { };
 
-        new ImmediateI32().Action(new VmValue[]{ new Int32Operand(lhs) }, env);
+        new ImmediateI32().Action(new VmValue[]{ Operand.From(lhs) }, env);
 
         var instr = new NegI32();
         instr.Action(args, env);
@@ -21,7 +21,7 @@ public class NegI32Tester {
         Assert.AreEqual(false, env.Stack.IsEmpty);
         Assert.IsNotNull(env.Stack.PeekTop());
         var result = env.Stack.PopTop();
-        Assert.IsInstanceOfType(result, typeof(Int32Operand));
-        Assert.AreEqual(computed, ((Int32Operand)result).Value);
+        //Assert.IsInstanceOfType(result, typeof(Int32Operand));
+        Assert.AreEqual(computed, (result).Int32);
     }
 }
