@@ -10,8 +10,13 @@ public class MacroAttribute : Attribute {
     /// </summary>
     /// <value>name</value>
     public string Name {get; private set;}
-    
-    public MacroAttribute(string name) {
+    /// <summary>
+    /// Description of what the macro does
+    /// </summary>
+    /// <value>description</value>
+    public string? Description {get; private set;}
+    public MacroAttribute(string name, string? description = null) {
         this.Name = name;
+        this.Description = description;
     }
 }

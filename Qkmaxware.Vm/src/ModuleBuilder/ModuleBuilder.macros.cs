@@ -8,7 +8,7 @@ public partial class ModuleBuilder {
     /// <summary>
     /// Insert all instructions required to print a string from the top of the stack
     /// </summary>
-    [Macro("printstr")]
+    [Macro("printstr", description: "Insert all instructions required to print a string from the top of the stack.")]
     public void PrintString() {
         // High level version of what we are attempting to do in bytecode assembly
         /*
@@ -59,7 +59,7 @@ public partial class ModuleBuilder {
     /// Create an ascii string constant and immediately load it to the stack
     /// </summary>
     /// <param name="text">constant text</param>
-    [Macro("immediate_ascii")]
+    [Macro("immediate_ascii", description: "Create a constant pool reference for an ASCII encoded string and load a pointer to that constant onto the stack.")]
     public void PushAscii(string text) {
         var constant = this.AddConstantAsciiString(text);
         this.PushConstant(constant);
@@ -69,7 +69,7 @@ public partial class ModuleBuilder {
     /// Create a UTF8 string constant and immediately load it to the stack
     /// </summary>
     /// <param name="text">constant text</param>
-    [Macro("immediate_utf8")]
+    [Macro("immediate_utf8", description: "Create a constant pool reference for an UTF8 encoded string and load a pointer to that constant onto the stack.")]
     public void PushUtf8(string text) {
         var constant = this.AddConstantUtf8String(text);
         this.PushConstant(constant);
@@ -79,7 +79,7 @@ public partial class ModuleBuilder {
     /// Create a UTF32 string constant and immediately load it to the stack
     /// </summary>
     /// <param name="text">constant text</param>
-    [Macro("immediate_utf32")]
+    [Macro("immediate_utf32", description: "Create a constant pool reference for an UTF32 encoded string and load a pointer to that constant onto the stack.")]
     public void PushUtf32(string text) {
         var constant = this.AddConstantUtf32String(text);
         this.PushConstant(constant);

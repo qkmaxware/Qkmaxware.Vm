@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Qkmaxware.Vm\Qkmaxware.Vm.csproj" />
+    <EmbeddedResource Include="docs/*.md"/>
   </ItemGroup>
 
   <ItemGroup>
