@@ -11,12 +11,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     permissions:
       packages: write
+      contents: write
     strategy: 
       fail-fast: false
       matrix: 
         os: [ ubuntu-latest ]
         dotnet: [ '7.0.x' ]
     steps:
+    # Init
     - name: Checkout Code
       uses: actions/checkout@master
     - name: Setup .NET Core - ${{ matrix.dotnet }}@${{ matrix.os }}
@@ -28,11 +30,53 @@ jobs:
         GITHUB_USERNAME: qkmaxware
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: dotnet restore
+    
+    # Create Standalone EXEs
+    - name: Create Windows Executable
+      env:
+        GITHUB_USERNAME: qkmaxware
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: dotnet publish Qkmaxware.Vm.Console.Standalone --configuration Release -r win-x64 -o .exe/win
+    - name: Compress Windows Executable
+      uses: montudor/action-zip@v1
+      with:
+        args: zip -qq -r .exe/qkvm.win-x64.zip .exe/win
+    - name: Create Linux Executable
+      env:
+        GITHUB_USERNAME: qkmaxware
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: dotnet publish Qkmaxware.Vm.Console.Standalone --configuration Release -r linux-x64 -o .exe/linux
+    - name: Compress Linux Executable
+      uses: montudor/action-zip@v1
+      with:
+        args: zip -qq -r .exe/qkvm.linux-x64.zip .exe/linux
+    - name: Create OSX Executable
+      env:
+        GITHUB_USERNAME: qkmaxware
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: dotnet publish Qkmaxware.Vm.Console.Standalone --configuration Release -r osx-x64 -o .exe/osx
+    - name: Compress OSX Executable
+      uses: montudor/action-zip@v1
+      with:
+        args: zip -qq -r .exe/qkvm.osx-x64.zip .exe/osx
+    
+    - name: Upload Executables
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        tag: ${{ github.ref }}
+        file: .exe/*.zip
+        file_glob: true
+        overwrite: true
+
+    # Create Nuget Packages
     - name: Pack Nuget Package
       env:
         # Work around https://github.com/actions/setup-dotnet/issues/29
         DOTNET_ROOT: ${{ runner.tool_cache }}/dncs/${{ matrix.dotnet }}/x64
-      run: dotnet pack --configuration Release --output .release
+      run: |
+        dotnet pack Qkmaxware.Vm --configuration Release --output .release
+        dotnet pack Qkmaxware.Vm.Console --configuration Release --output .release
     - name: Publish Nuget Package
       env:
         # Work around https://github.com/actions/setup-dotnet/issues/29

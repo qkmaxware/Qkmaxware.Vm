@@ -1,0 +1,1 @@
+﻿Qkmaxware.Vm.Terminal.Program.Main();

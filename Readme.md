@@ -20,8 +20,14 @@ This repository produces 2 individual packages.
 ### Qkmaxware.Vm
 The core package consisting of all the source code for the virtual machine and all related functionality. You can use package management to include this into your own projects such as for use as a compilation target in your own compiler.
 
+Available as:
+- Nuget package [here](https://github.com/qkmaxware?tab=packages&repo_name=Qkmaxware.Vm)
+
 ### Qkmaxware.Vm.Console
 A console application that can be installed as a dotnet tool and invoked using the `qkvm` command. It is capable of running code, assembling bytecode, inspecting bytecode and providing quick access to documentation. You should install this to run code produced in a stand-alone manor and not as a part of another application. 
+
+- Nuget package [here](https://github.com/qkmaxware?tab=packages&repo_name=Qkmaxware.Vm)
+- Standalone Executable [here](https://github.com/qkmaxware/Qkmaxware.Vm/releases)
 
 ## Virtual Machine
 The virtual machine is a stack based virtual machine. Each instructions is fetched from a bytecode file, decoded, mapped to an existing instruction, and then executed. All common virtual machine instructions are supported for 32 bit integers, 32 bit unsigned integers, and 32bit floating point numbers. 

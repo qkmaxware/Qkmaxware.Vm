@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Qkmaxware.Vm.Test", "Qkmaxw
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Qkmaxware.Vm.Web", "Qkmaxware.Vm.Web\Qkmaxware.Vm.Web.csproj", "{0495E4A1-2705-493F-B1E1-6544A3BBB7D7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Qkmaxware.Vm.Console.Standalone", "Qkmaxware.Vm.Console.Standalone\Qkmaxware.Vm.Console.Standalone.csproj", "{0FA7CA15-780F-41B1-A398-87CACEC9EE94}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +38,9 @@ Global
 		{0495E4A1-2705-493F-B1E1-6544A3BBB7D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0495E4A1-2705-493F-B1E1-6544A3BBB7D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0495E4A1-2705-493F-B1E1-6544A3BBB7D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0FA7CA15-780F-41B1-A398-87CACEC9EE94}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0FA7CA15-780F-41B1-A398-87CACEC9EE94}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0FA7CA15-780F-41B1-A398-87CACEC9EE94}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0FA7CA15-780F-41B1-A398-87CACEC9EE94}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
