@@ -40,7 +40,7 @@ public class Docs : BaseCommand {
                 Console.WriteLine();
                 PrintTopics();
             } else {
-                selected.WriteOut();
+                selected.WriteOut(Console.Out);
             }
         }
     }

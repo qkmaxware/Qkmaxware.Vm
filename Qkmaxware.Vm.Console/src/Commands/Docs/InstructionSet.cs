@@ -6,27 +6,27 @@ namespace Qkmaxware.Vm.Terminal.Commands;
 
 public class InstructionSetDocument : GeneratedDocument {
     public override string Name() => "Bytecode Instruction Set";
-    public override void WriteOut() {
+    public override void WriteOut(TextWriter writer) {
         var tab = "  ";
-        Console.WriteLine("# Bytecode Instruction Set");
+        writer.WriteLine("# Bytecode Instruction Set");
         foreach (var instr in InstructionMap.Instance) {
-            Console.WriteLine(tab + "--------------------------------");
-            Console.Write(tab); Console.Write($"0x{instr.Opcode:X2} "); Console.WriteLine(instr.Name);
-            Console.WriteLine(tab + "--------------------------------");
-            Console.Write(tab); Console.WriteLine("description:");
-            Console.Write(tab); Console.Write(tab); Console.WriteLine(instr.Description);
-            Console.Write(tab); Console.WriteLine("format:");
-            Console.Write(tab); Console.Write(tab);
-            Console.Write(instr.Name);
+            writer.WriteLine(tab + "--------------------------------");
+            writer.Write(tab); writer.Write($"0x{instr.Opcode:X2} "); writer.WriteLine(instr.Name);
+            writer.WriteLine(tab + "--------------------------------");
+            writer.Write(tab); writer.WriteLine("description:");
+            writer.Write(tab); writer.Write(tab); writer.WriteLine(instr.Description);
+            writer.Write(tab); writer.WriteLine("format:");
+            writer.Write(tab); writer.Write(tab);
+            writer.Write(instr.Name);
             foreach (var arg in instr.Arguments) {
-                Console.Write(' ');
-                Console.Write(arg.GetType().Name);
-                Console.Write('(');
-                Console.Write(arg.Name);
-                Console.Write(")");
+                writer.Write(' ');
+                writer.Write(arg.GetType().Name);
+                writer.Write('(');
+                writer.Write(arg.Name);
+                writer.Write(")");
             }
-            Console.WriteLine();
-            Console.WriteLine();
+            writer.WriteLine();
+            writer.WriteLine();
         }
     }
 }

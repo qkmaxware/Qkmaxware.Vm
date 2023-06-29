@@ -6,7 +6,7 @@ namespace Qkmaxware.Vm.Terminal.Commands;
 
 public abstract class Document {
     public abstract string Name();
-    public abstract void WriteOut();
+    public abstract void WriteOut(TextWriter writer);
 }
 
 
@@ -23,11 +23,11 @@ public class EmbeddedDocument : Document {
         this.name = name;
     }
 
-    public override void WriteOut() {
+    public override void WriteOut(TextWriter writer) {
         Stream? stream = assembly.GetManifestResourceStream(resource);
         if (stream != null) {
             using (var reader = new StreamReader(stream)) {
-                Console.WriteLine(reader.ReadToEnd());
+                writer.WriteLine(reader.ReadToEnd());
             }
         }
     }

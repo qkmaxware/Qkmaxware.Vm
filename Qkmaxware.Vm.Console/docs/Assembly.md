@@ -15,6 +15,26 @@ The default dialect described in this document is simply known as "asm" and it i
 
 Each line of the file is treated as its own command. Most commands are directly mapped to instructions within the virtual machine. Each type of command is detailed below. 
 
+```bnf
+<asm>            ::= "use" <dialect> <version> <statement-list>
+<dialect>        ::= <identifier>
+<version>        ::= DIGIT+ "." DIGIT+
+
+<comment>        ::= regex("//[^\n]+") -> skip
+<statement-list> ::= (<statement> "\n")*
+<statement>      ::= <import> | <export> | <label> | <constant-def> | <macro> | <instruction>
+<import>         ::= "import" <string>
+<export>         ::= "export" <string>
+<label>          ::= "." <identifier>
+<constant-def>   ::= "@" <identifier> "=" <arg>
+<macro>          ::= "!" <identifier> <arg-list>
+<instruction>    ::= <identifier> <arg-list>
+
+<arg-list>       ::= <arg>*
+<arg>            ::= INTEGER | LONG | FLOAT | STRING | "@" <identifier>
+<identifier>     ::= (LETTER | DIGIT | "_")+
+```
+
 ### Comments
 Comments are standard C-style line comments that can be placed on their own line or at the end of other lines.
 ```

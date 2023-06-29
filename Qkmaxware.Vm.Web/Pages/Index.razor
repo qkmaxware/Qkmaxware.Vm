@@ -1,0 +1,223 @@
+﻿@page "/"
+@using System.Text;
+@using Qkmaxware.Vm;
+@using Qkmaxware.Vm.Assembly;
+@using System.Reflection;
+@inject IJSRuntime js;
+
+<PageTitle>Index</PageTitle>
+
+<div id="editor-container">
+    <textarea id="editor" name="editor" @ref="editor">use asm 1.0
+
+@@hello = "Hello World"
+
+export "Main"
+.main
+    load_const @@hello
+    !printstr
+    exit 0
+    </textarea>
+</div>
+
+<div id="attribution">
+    Powered by <a href="https://codemirror.net/" target="_blank"><img src="https://codemirror.net/style/logo.svg" style="width: 1em">Code Mirror</a>
+</div>
+
+<div id="actions">
+    <div id="action-bar">
+        <button @onclick=help title="Show help window">?</button>
+        <button @onclick=download title="Download bytecode">&#11123;</button>
+        <button @onclick=buildAndRun title="Run">&#9658;</button>
+    </div>
+    <div>
+        @foreach (var notification in this.notifications) {
+            <div class="notice @notification.Level">
+                <span style="float: right">@notification.Created.ToLongTimeString()</span>
+                <div style="margin-left: 16px; margin-top: 8px;">
+                    @notification.Message 
+                </div>
+                <div style="text-align: right">
+                    <button style="font-size: small; color: inherit;" @onclick=@(() => notifications.Remove(notification))>clear</button>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="modal" style="display: @(showHelp? "block" : "none");">
+    <div class="modal-content">
+        <header>
+            Help
+            <button style="float: right;" @onclick=closeHelp>&times;</button>
+        </header>
+        <div class="row">
+            <nav>
+                <button style="font-size: medium; display: block; width: 100%;" @onclick=helpUsage>Basic Usage</button>
+                <button style="font-size: medium; display: block; width: 100%;" @onclick=helpIS>Instruction Set</button>
+                <button style="font-size: medium; display: block; width: 100%;" @onclick=helpMacro>Macro Listing</button>
+            </nav>
+            <article><tt>@helpContent</tt></article>
+        </div>
+        <footer></footer>
+    </div>
+</div>
+
+@code {
+
+    private ElementReference? editor;
+
+    private List<Notification> notifications = new List<Notification>();
+
+    private bool showHelp;
+    private string? helpContent;
+
+    protected override void OnAfterRender(bool first) {
+        if (first) {
+            js.InvokeVoidAsync("initEditor", "editor");
+        }
+    }
+
+    private void help() {
+        showHelp = true;
+    }
+    private void closeHelp() {
+        showHelp = false;
+    }
+
+    private void helpUsage() {
+        StringBuilder sb = new StringBuilder();
+
+        sb.AppendLine("Type assembly code into the provided editor. Other documents in the help section can be used as an assembly reference.");
+        sb.AppendLine();
+        sb.AppendLine("Use the ⭳ button to download the assembled bytecode.");
+        sb.AppendLine();
+        sb.AppendLine("Use the ► button to assemble bytecode and then run that code in the built in virtual machine.");
+        sb.AppendLine();
+        sb.AppendLine("A rough grammar of the assembly format is as follows:");
+        sb.AppendLine(@"<asm>            ::= ""use"" <dialect> <version> <statement-list>
+<dialect>        ::= ""asm""
+<version>        ::= DIGIT+ ""."" DIGIT+
+
+<comment>        ::= regex(""//[^\n]+"") -> skip
+<statement-list> ::= (<statement> ""\n"")*
+<statement>      ::= <import> | <export> | <label> | <constant-def> | <macro> | <instruction>
+<import>         ::= ""import"" <string>
+<export>         ::= ""export"" <string>
+<label>          ::= ""."" <identifier>
+<constant-def>   ::= ""@"" <identifier> ""="" <arg>
+<macro>          ::= ""!"" <identifier> <arg-list>
+<instruction>    ::= <identifier> <arg-list>
+
+<arg-list>       ::= <arg>*
+<arg>            ::= INTEGER | LONG | FLOAT | STRING | ""@"" <identifier>
+<identifier>     ::= (LETTER | DIGIT | ""_"")+"
+        );
+
+        helpContent = sb.ToString();
+    }
+    private void helpIS() {
+        var tab = "\t"; 
+        StringBuilder sb = new StringBuilder();
+        foreach (var instr in InstructionMap.Instance) {
+            sb.AppendLine("--------------------------------");
+            sb.Append($"0x{instr.Opcode:X2} "); sb.AppendLine(instr.Name);
+            sb.AppendLine("--------------------------------");
+            sb.AppendLine("description:");
+            sb.Append(tab); sb.AppendLine(instr.Description);
+            sb.AppendLine("format:");
+            sb.Append(tab);
+            sb.Append(instr.Name);
+            foreach (var arg in instr.Arguments) {
+                sb.Append(' ');
+                sb.Append(arg.GetType().Name);
+                sb.Append('(');
+                sb.Append(arg.Name);
+                sb.Append(")");
+            }
+            sb.AppendLine();
+            sb.AppendLine();
+        }
+        helpContent = sb.ToString();
+    }
+
+    private void helpMacro() {
+        var tab = "\t";
+        StringBuilder sb = new StringBuilder();
+        var macros = typeof(ModuleBuilder)
+        .GetMethods()
+        .Where(method => Attribute.IsDefined(method, typeof(MacroAttribute)));
+        foreach (var method in macros) {
+            var macro = method.GetCustomAttribute<MacroAttribute>();
+            sb.AppendLine("--------------------------------");
+            sb.AppendLine(macro?.Name);
+            sb.AppendLine("--------------------------------");
+            sb.AppendLine("description:");
+            sb.Append(tab); sb.AppendLine(macro?.Description);
+            sb.AppendLine("format:");
+            sb.Append(tab);
+            sb.Append('!');
+            sb.Append(macro?.Name);
+            foreach (var arg in method.GetParameters()) {
+                sb.Append(' ');
+                sb.Append(arg.ParameterType);
+                sb.Append('(');
+                sb.Append(arg.Name);
+                sb.Append(")");
+            }
+            sb.AppendLine();
+            sb.AppendLine();
+        }
+        helpContent = sb.ToString();
+    }
+
+    private async Task download() {
+        try {
+            var program = await js.InvokeAsync<string>("editorValue");
+
+            var asm = new Assembler();
+            using var reader = new StringReader(program);
+            
+            var module = asm.FromStream(reader);
+
+            using (var stream = new MemoryStream()) {
+                var writer = new BinaryWriter(stream);
+
+                writer.Flush();
+                stream.Position = 0;
+
+                await js.InvokeVoidAsync("downloadFileFromStream", "module.qkbc", new DotNetStreamReference(stream: stream));
+                writer.Dispose();
+            }
+        } catch (Exception e) {
+            notifications.Add(new Notification(NotificationLevel.Error, e.Message));
+        }
+    }
+
+    private async Task buildAndRun() {
+        try {
+            var program = await js.InvokeAsync<string>("editorValue");
+
+            var asm = new Assembler();
+            using var reader = new StringReader(program);
+            
+            var module = asm.FromStream(reader);
+
+            var sb = new StringBuilder();
+            var host = new HostInterface(
+                stdin: new StringReader(""), // TODO proper stdin
+                stdout: new StringWriter(sb)
+            );
+            var vm = new Machine(host);
+            var thread = vm.LoadProgram(module);
+
+            notifications.Add(new Notification(NotificationLevel.Info, "Beginning program"));
+            await InvokeAsync(StateHasChanged);
+            thread.RunUntilComplete();
+
+            notifications.Add(new Notification(NotificationLevel.Success, sb.ToString()));
+        } catch (Exception e) {
+            notifications.Add(new Notification(NotificationLevel.Error, e.Message));
+        }
+    }
+}

@@ -8,7 +8,7 @@ public class RuntimeEnvironment {
     /// Interface between the VM and the host machine
     /// </summary>
     /// <returns>interface</returns>
-    public HostInterface Host {get; private set;} = HostInterface.Default();
+    public HostInterface Host {get; private set;}
     /// <summary>
     /// Constants accessible to the runtime
     /// </summary>
@@ -26,7 +26,9 @@ public class RuntimeEnvironment {
     /// <value>heap</value>
     public IRandomAccessMemory Heap {get; private set;} = LinearByteArrayMemory.Zero;
 
-    public RuntimeEnvironment() {}
+    public RuntimeEnvironment() {
+        this.Host = HostInterface.Default();
+    }
 
     public RuntimeEnvironment(Module module, HostInterface @interface, IRandomAccessMemory heap) {
         this.Host = @interface;
