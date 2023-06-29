@@ -9,6 +9,8 @@ jobs:
   publish:
     name: Publish
     runs-on: ${{ matrix.os }}
+    permissions:
+      packages: write
     strategy: 
       fail-fast: false
       matrix: 
