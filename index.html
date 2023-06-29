@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Qkmaxware.Vm.Web</title>
+    <base href="/Qkmaxware.Vm/" />
+    <link href="css/app.css" rel="stylesheet" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <link href="Qkmaxware.Vm.Web.styles.css" rel="stylesheet" />
+    <link href="lib/codemirror/codemirror.css" rel="stylesheet" />
+    <link href="lib/codemirror/theme.material-darker.css" rel="stylesheet" />
+</head>
+
+<body>
+    <div id="app">
+        <svg class="loading-progress">
+            <circle r="40%" cx="50%" cy="50%" />
+            <circle r="40%" cx="50%" cy="50%" />
+        </svg>
+        <div class="loading-progress-text"></div>
+    </div>
+
+    <div id="blazor-error-ui">
+        An unhandled error has occurred.
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
+    <script src="_framework/blazor.webassembly.js"></script>
+    <script src="lib/codemirror/codemirror.js" type="text/javascript" charset="utf-8"></script>
+    <script src="lib/codemirror/addons.simple.js" type="text/javascript" charset="utf-8"></script>
+    <script>
+        function initEditor(el) {
+            CodeMirror.defineSimpleMode(
+                "qkasm",
+                {
+                    start: [
+                        { regex: /(use|import|export)/, token: "keyword" },
+                        { regex: /(\.\w+)/, token: "keyword" },
+                        { regex: /@[a-zA-Z$_]*/, token: "variable" },
+                        { regex: /![a-zA-Z$_]*/, token: "string" },
+                        { regex: /^\s*[a-zA-Z][a-zA-Z0-9$_]*/, token: "identifier" },
+                        { regex: /0x[a-f\d]+|[-+]?(?:\.\d+|\d+\.?\d*)(?:e[-+]?\d+)?/i, token: "number" },
+                        { regex: /\/\/.*/, token: "comment" },
+                        { regex: /"(?:[^\\]|\\.)*?(?:"|$)/, token: "string" },
+                    ],
+                    meta: {
+                        dontIndentStates: ["comment"],
+                        lineComment: "//"
+                    }
+                }
+            );
+            var CodeEditor = CodeMirror.fromTextArea(
+                document.getElementById(el),
+                {
+                    lineNumbers: true,
+                    styleActiveLine: true,
+                    matchBrackets: true,
+                    theme: "material-darker",
+                    mode: "qkasm"
+                }
+            );
+            CodeEditor.setSize("100%", "100%");
+            window.editor = CodeEditor;
+        }
+        function editorValue() {
+            return window.editor.getValue();
+        }
+        async function downloadFileFromStream (fileName, contentStreamReference) {
+            const arrayBuffer = await contentStreamReference.arrayBuffer();
+            const blob = new Blob([arrayBuffer]);
+            const url = URL.createObjectURL(blob);
+            const anchorElement = document.createElement('a');
+            anchorElement.href = url;
+            anchorElement.download = fileName ?? '';
+            anchorElement.click();
+            anchorElement.remove();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+
+</html>
