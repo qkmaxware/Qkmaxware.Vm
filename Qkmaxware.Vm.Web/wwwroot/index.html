@@ -67,6 +67,9 @@
         function editorValue() {
             return window.editor.getValue();
         }
+        function setEditorValue(content) {
+            return window.editor.setValue(content);
+        }
         async function downloadFileFromStream (fileName, contentStreamReference) {
             const arrayBuffer = await contentStreamReference.arrayBuffer();
             const blob = new Blob([arrayBuffer]);
@@ -77,6 +80,13 @@
             anchorElement.click();
             anchorElement.remove();
             URL.revokeObjectURL(url);
+        }
+        function allStorage() {
+            var archive = [];
+            for (var i = 0; i< window.localStorage.length; i++) {
+                archive.push(localStorage.key(i));
+            }
+            return archive;
         }
     </script>
 </body>

@@ -26,6 +26,8 @@ export "Main"
 
 <div id="actions">
     <div id="action-bar">
+        <button @onclick=beginSave title="Save code">Save</button>
+        <button @onclick=beginLoad title="Load code">Load</button>
         <button @onclick=help title="Show help window">?</button>
         <button @onclick=download title="Download bytecode">&#11123;</button>
         <button @onclick=buildAndRun title="Run">&#9658;</button>
@@ -42,6 +44,40 @@ export "Main"
                 </div>
             </div>
         }
+    </div>
+</div>
+
+<div class="modal" style="display: @(showSave? "block" : "none");">
+    <div class="modal-content">
+        <header>
+            Save
+            <button style="float: right;" @onclick=closeSave>&times;</button>
+        </header>
+        <div style="text-align: center">
+            <input @bind=saveName placeholder="file name">
+            <button @onclick=saveNow>Save and Close</button>
+        </div>
+        <footer></footer>
+    </div>
+</div>
+
+<div class="modal" style="display: @(showLoad? "block" : "none");">
+    <div class="modal-content">
+        <header>
+            Load
+            <button style="float: right;" @onclick=closeLoad>&times;</button>
+        </header>
+        <div>
+            <div style="text-align: center;">Select a saved program from the list below</div>
+            <hr>
+            @if (this.saves != null) {
+                foreach(var save in saves) {
+                    <button style="width: 100%;" @onclick=@(() => loadNow(save))>@save</button>
+                }
+            }
+            <article><tt>@helpContent</tt></article>
+        </div>
+        <footer></footer>
     </div>
 </div>
 
@@ -76,6 +112,45 @@ export "Main"
         if (first) {
             js.InvokeVoidAsync("initEditor", "editor");
         }
+    }
+
+    private bool showSave;
+    private string? saveName;
+    private void beginSave() {
+        showSave = true;
+    }
+    private async Task saveNow() {
+        var name = saveName;
+        if (!string.IsNullOrEmpty(name)) {
+            var program = await js.InvokeAsync<string>("editorValue");
+            await js.InvokeVoidAsync("window.localStorage.setItem", "qkasm." + name, program);
+            closeSave();
+        }
+    }
+    private void closeSave() {
+        showSave = false;
+    }
+
+    private bool showLoad;
+    private List<string>? saves;
+    private async Task beginLoad() {
+        saves = await listSaves();
+        showLoad = true;
+    }
+    private async Task<List<string>> listSaves() {
+        var storage = await js.InvokeAsync<string[]>("allStorage");
+        return storage
+            .Where(entry => entry.StartsWith("qkasm."))
+            .Select(entry => entry.Substring("qkasm.".Length))
+            .ToList();
+    }
+    private async Task loadNow(string name) {
+        var content = await js.InvokeAsync<string>("window.localStorage.getItem", "qkasm." + name);
+        await js.InvokeVoidAsync("setEditorValue", content);
+        closeLoad();
+    }
+    private void closeLoad() {
+        showLoad = false;
     }
 
     private void help() {

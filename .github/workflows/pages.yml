@@ -1,8 +1,6 @@
 name: Deploy Github Pages
 on:
-  release: 
-    types:
-    - released
+  push: 
     branches: 
     - "root"
 jobs:
