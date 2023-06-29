@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\LICENSE" CopyToOutputDirectory="Always" Pack="true" PackagePath="$(PackageLicenseFile)" />
+    <None Include="..\LICENSE.md" CopyToOutputDirectory="Always" Pack="true" PackagePath="$(PackageLicenseFile)" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -27,7 +27,7 @@
 
     <PackageId>Qkmaxware.Vm.Console</PackageId>
     <PackageTags>virtual machine</PackageTags>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
     <RepositoryUrl>https://github.com/qkmaxware/Qkmaxware.Vm.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>

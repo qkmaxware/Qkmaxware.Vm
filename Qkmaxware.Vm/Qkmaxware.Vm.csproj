@@ -9,13 +9,13 @@
     <Version>1.0.0</Version>
     <Authors>Colin</Authors>
     <PackageTags>virtual machine</PackageTags>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
     <RepositoryUrl>https://github.com/qkmaxware/Qkmaxware.Vm.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\LICENSE" CopyToOutputDirectory="Always" Pack="true" PackagePath="$(PackageLicenseFile)" />
+    <None Include="..\LICENSE.md" CopyToOutputDirectory="Always" Pack="true" PackagePath="$(PackageLicenseFile)" />
   </ItemGroup>
 
 </Project>

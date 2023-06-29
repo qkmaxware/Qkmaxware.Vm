@@ -9,6 +9,8 @@ jobs:
   deploy:
     name: Deploy Github Pages
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout Code
         uses: actions/checkout@master
@@ -38,8 +40,6 @@ jobs:
 
       - name: Commit to Github Pages
         uses: JamesIves/github-pages-deploy-action@4.1.3
-        permissions:
-          contents: write
         with:
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: gh-pages
