@@ -1,0 +1,41 @@
+{
+  "name": "qkasm-language-support",
+  "displayName": "Qkmaxware VM Assembly Language Support",
+  "description": "Syntax highlighting and language support for Qkmaxware VM Assembly",
+  "author": "Colin",
+  "version": "0.0.1",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.79.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Snippets"
+  ],
+  "main": "./extension",
+  "contributes": {
+    "languages": [{
+      "id": "qkasm",
+      "aliases": ["Qkmaxware VM Assembly", "qkasm"],
+      "extensions": [".qkasm"],
+      "configuration": "./language-support/language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "qkasm",
+      "scopeName": "source.qkasm",
+      "path": "./language-support/qkasm.tmLanguage.json"
+    }],
+    "snippets": [
+			{
+				"language": "qkasm",
+				"path": "./language-support/qkasm.snippets.json"
+			}
+		]
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.79.0",
+    "@types/node": "20.2.5",
+    "@vscode/test-electron": "^2.3.2"
+  },
+  "dependencies": {}
+}

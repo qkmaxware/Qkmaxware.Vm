@@ -1,0 +1,40 @@
+use asm 1.0
+
+@n = 5
+
+.main 
+    load_const @n
+    call .factorial 1
+    i32_to_string 
+    !printstr
+    exit 0
+
+export "Factorial(int)"
+.factorial 
+    immediate_i32 1 // Declare factorial result
+    immediate_i32 1 // Declare index
+    .while
+        .condition
+            // If i > number stop
+            load_local 1
+            load_arg 0
+            immediate_i32 1
+            add_i32
+            sub_i32 
+            goto_if_zero .end
+        .body
+            // Result = Result * Index
+            load_local 0
+            load_local 1
+            mul_i32
+            store_local 0
+
+            // Index += 1
+            load_local 1
+            immediate_i32 1
+            add_i32
+            store_local 1
+            
+            goto .condition
+        .end
+    return_function 

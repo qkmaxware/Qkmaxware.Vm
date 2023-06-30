@@ -11,6 +11,7 @@
     <link href="Qkmaxware.Vm.Web.styles.css" rel="stylesheet" />
     <link href="lib/codemirror/codemirror.css" rel="stylesheet" />
     <link href="lib/codemirror/theme.material-darker.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 
 <body>
@@ -41,7 +42,7 @@
                         { regex: /@[a-zA-Z$_]*/, token: "variable" },
                         { regex: /![a-zA-Z$_]*/, token: "string" },
                         { regex: /^\s*[a-zA-Z][a-zA-Z0-9$_]*/, token: "identifier" },
-                        { regex: /0x[a-f\d]+|[-+]?(?:\.\d+|\d+\.?\d*)(?:e[-+]?\d+)?/i, token: "number" },
+                        { regex: /0x[a-f\d]+|[-+]?(?:\.\d+|\d+\.?\d*)(?:e[-+]?\d+)?(u|f)?/i, token: "number" },
                         { regex: /\/\/.*/, token: "comment" },
                         { regex: /"(?:[^\\]|\\.)*?(?:"|$)/, token: "string" },
                     ],

@@ -1,0 +1,72 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "Qkmaxware VM Assembly",
+	"scopeName": "source.qkasm",
+	"patterns": [
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#values"
+		},
+		{
+			"include": "#strings"
+		},
+		{
+			"include": "#instructions"
+		},
+		{
+			"include": "#comments"
+		}
+	],
+	"repository": {
+		"keywords": {
+			"patterns": [{
+				"name": "keyword.qkasm",
+				"match": "\\b(use|export|import)\\b"
+			}]
+		},
+		"values": {
+			"patterns": [{
+				"name": "constant.numeric.qkasm",
+				"match": "\\b\\d+(\\.\\d+)?[Uuf]?"
+			},
+			{
+				"name": "variable.parameter.qkasm",
+				"match": "\\@\\w+"
+			},
+			{
+				"name": "keyword.qkasm.label",
+				"match": "\\.\\w+"
+			},
+			{
+				"name": "entity.name.function.qkasm",
+				"match": "\\!\\w+"
+			}]
+		},
+		"strings": {
+			"name": "string.quoted.double.qkasm",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape.qkasm",
+					"match": "\\\\."
+				}
+			]
+		},
+		"instructions": {
+			"patterns": [{
+				"name": "keyword.control.qkasm",
+				"match": "\\b(goto|goto_if_nzero|goto_if_zero|call|call_external|return_function|return_procedure)\\b"
+			},{
+				"name": "keyword.operator.qkasm",
+				"match": "\\b\\w+"
+			}]
+		},
+		"comments": {
+			"name": "comment.line.qkasm",
+			"match": "//.*"
+		}
+	}
+}

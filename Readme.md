@@ -51,6 +51,8 @@ An assembly language is also provided to allow one to write code in a human read
 ### Assembly Syntax
 For more information on the syntax of the assembly language you can read about it [here](Qkmaxware.Vm.Console/docs/Assembly.md).
 
+A simple Visual Studio Code extension has been developed that supports syntax highlighting, code inspection, and code suggestions for this specific assembly syntax. You can download it on the [releases](https://github.com/qkmaxware/Qkmaxware.Vm/releases) page as a .zip file. To install it simply unzip it into your ``<user home>/.vscode/extensions`` directory.
+
 ### Assembling
 Assembling of assembly files to bytecode files is able to be done using the [Assembler](Qkmaxware.Vm/src/Assembly/Assembler.cs) class or via the command line tool with the `qkvm assemble` command. 
 

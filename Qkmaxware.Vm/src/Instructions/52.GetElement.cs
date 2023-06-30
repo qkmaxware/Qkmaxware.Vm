@@ -21,7 +21,7 @@ public class GetElement : Instruction {
             var element = (ArrayConstant)runtime.ConstantPool[ptr.IntValue];
             runtime.Stack.PushTop(element.GetElementAt(offset.Int32));
         } else if (ptr.IsHeapAddress()) {
-            var index = ptr.IntValue + offset.Int32;
+            var index = ptr.IntValue + (4 * offset.Int32); // On the heap elements are read as words (32bits/4bytes)
             runtime.Stack.PushTop(Operand.From(runtime.Heap.ReadWord32(index)));
         } else {
             throw new NotImplementedException();

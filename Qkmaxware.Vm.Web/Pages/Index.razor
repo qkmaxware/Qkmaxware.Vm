@@ -26,11 +26,12 @@ export "Main"
 
 <div id="actions">
     <div id="action-bar">
-        <button @onclick=beginSave title="Save code">Save</button>
-        <button @onclick=beginLoad title="Load code">Load</button>
-        <button @onclick=help title="Show help window">?</button>
-        <button @onclick=download title="Download bytecode">&#11123;</button>
-        <button @onclick=buildAndRun title="Run">&#9658;</button>
+        <button @onclick=beginSave title="Save code"><i class="fa fa-save"></i></button>
+        <button @onclick=beginLoad title="Load code"><i class="fa fa-folder-open"></i></button>
+        <button @onclick=help title="Show help window"><i class="fa fa-info-circle"></i></button>
+        <button @onclick=download title="Download bytecode"><i class="fa fa-download"></i></button>
+        <button @onclick=stdin title="Settings"><i class="fa  fa-gears"></i></button>
+        <button @onclick=buildAndRun title="Run"><i class="fa fa-play"></i></button>
     </div>
     <div>
         @foreach (var notification in this.notifications) {
@@ -44,6 +45,20 @@ export "Main"
                 </div>
             </div>
         }
+    </div>
+</div>
+
+<div class="modal" style="display: @(showStdin? "block" : "none");">
+    <div class="modal-content">
+        <header>
+            Settings
+            <button style="float: right;" @onclick=closeStdin>&times;</button>
+        </header>
+        <div style="text-align: center">
+            <h3>Standard Input Text</h3>
+            <textarea @bind=stdinText></textarea>
+        </div>
+        <footer></footer>
     </div>
 </div>
 
@@ -70,6 +85,9 @@ export "Main"
         <div>
             <div style="text-align: center;">Select a saved program from the list below</div>
             <hr>
+            @foreach (var entry in this.builtins) {
+                <button style="width: 100%;" @onclick=@(() => loadContent(entry.Value))>@entry.Key</button>
+            }
             @if (this.saves != null) {
                 foreach(var save in saves) {
                     <button style="width: 100%;" @onclick=@(() => loadNow(save))>@save</button>
@@ -131,6 +149,69 @@ export "Main"
         showSave = false;
     }
 
+    private Dictionary<string, string> builtins = new Dictionary<string, string>{
+        {"Hello World", @"use asm 1.0
+
+@hello = ""Hello World""
+
+export ""Main""
+.main
+    load_const @hello
+    !printstr
+    exit 0"},
+        {"Printing Numbers", @"use asm 1.0
+
+@pi = 3.14f
+
+export ""Main""
+.main
+    load_const @pi
+    f32_to_string 
+    dup
+    !printstr
+    free
+    exit 0"},
+        {"Factorial", @"use asm 1.0
+
+@n = 5
+
+.main 
+    load_const @n
+    call .factorial 1
+    i32_to_string 
+    dup
+    !printstr
+    free
+    exit 0
+
+export ""Factorial(int)""
+.factorial 
+    immediate_i32 1 	// Declare factorial result as local_0
+    load_arg 0
+    goto_if_zero .end
+    load_arg 0			// Compute n-1
+    immediate_i32 1
+    sub_i32
+    call .factorial 1	// Compute factorial(n-1)
+    load_arg 0
+    mul_i32				// Multiply factorial(n-1) * n
+    store_local 0
+.end
+    load_local 0
+    return_function"},
+        {"Echo User IO", @"use asm 1.0
+
+export ""Main""
+.main
+	.loop
+    readchar
+    dup 
+    goto_if_zero .end
+    putchar
+    goto .loop
+    .end
+    exit 0"},
+    };
     private bool showLoad;
     private List<string>? saves;
     private async Task beginLoad() {
@@ -143,6 +224,10 @@ export "Main"
             .Where(entry => entry.StartsWith("qkasm."))
             .Select(entry => entry.Substring("qkasm.".Length))
             .ToList();
+    }
+    private async Task loadContent(string content) {
+        await js.InvokeVoidAsync("setEditorValue", content);
+        closeLoad();
     }
     private async Task loadNow(string name) {
         var content = await js.InvokeAsync<string>("window.localStorage.getItem", "qkasm." + name);
@@ -269,6 +354,15 @@ export "Main"
         }
     }
 
+    private bool showStdin;
+    private string? stdinText = "Foo Bar Baz";
+    public void stdin() {
+        showStdin = true;
+    }
+    public void closeStdin() {
+        showStdin = false;
+    }
+
     private async Task buildAndRun() {
         try {
             var program = await js.InvokeAsync<string>("editorValue");
@@ -280,7 +374,7 @@ export "Main"
 
             var sb = new StringBuilder();
             var host = new HostInterface(
-                stdin: new StringReader(""), // TODO proper stdin
+                stdin: new StringReader(this.stdinText ?? string.Empty),
                 stdout: new StringWriter(sb)
             );
             var vm = new Machine(host);
