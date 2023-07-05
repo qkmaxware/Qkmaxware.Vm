@@ -1,3 +1,5 @@
+using Qkmaxware.Vm.Instructions;
+
 namespace Qkmaxware.Vm;
 
 /// <summary>
@@ -194,5 +196,34 @@ public partial class ModuleBuilder {
     /// <param name="value">value to add</param>
     public ConstantRef AddConstantUtf32String(string str) {
         return this.AddConstant(new StringConstant(ConstantInfo.Utf32, str));
+    }
+
+    /// <summary>
+    /// Append the contents of this module into this builder
+    /// </summary>
+    /// <param name="module">module to append</param>
+    public void Append(Module module) {
+        var code_offset = this.Anchor();
+        var constant_offset = this.constants.Count;
+
+        // Add imports and exports, modify exports to point to new code location
+        this.imports.AddRange(module.Imports);
+        this.exports.AddRange(module.Exports.Select(x => new Export(x.Name, (int)(code_offset + x.CodePosition))));
+
+        // Update constant pool
+        this.constants.AddRange(module.ConstantPool);
+
+        // Update code, point to new constants when required to.
+        // Since we aren't linking we don't need to update import and export references (call external)
+        var dis = new Disassembler();
+        foreach (var instr in dis.DisassembleCode(module)) {
+            if (instr.Instruction is LoadConst) {
+                // Re-write the index
+                var new_index = Operand.From(((Operand)instr.Arguments.ElementAt(0)).Int32 + constant_offset);
+                this.AddInstruction(instr.Instruction, new VmValue[]{ new_index });
+            } else {
+                this.AddInstruction(instr.Instruction, instr.Arguments.ToArray());
+            }
+        }
     }
 }

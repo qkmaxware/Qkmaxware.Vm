@@ -13,14 +13,32 @@ public partial class ModuleBuilder : IDisposable {
     private List<Export> exports = new List<Export>();
     HashSet<string> export_names = new HashSet<string>();
 
+    /// <summary>
+    /// Create a new module builder that writes bytecode in-memory
+    /// </summary>
     public ModuleBuilder() {
         bytecode = new BinaryWriter(new MemoryStream());
     }
 
+    /// <summary>
+    /// Create a new module builder that writes bytecode to the specific stream
+    /// </summary>
+    /// <param name="bytecodeStream">stream to write bytecode to</param>
+    //public ModuleBuilder(Stream bytecodeStream) {
+        //bytecode = new BinaryWriter(bytecodeStream);
+    //}
+
+    /// <summary>
+    /// Dispose of this module builder
+    /// </summary>
     public void Dispose() {
         bytecode.Dispose();
     }
 
+    /// <summary>
+    /// Create a module from the given builder
+    /// </summary>
+    /// <returns>module</returns>
     public Module ToModule() {
         Module mod = new Module();
 

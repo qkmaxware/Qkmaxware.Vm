@@ -162,4 +162,14 @@ public partial class ModuleBuilder {
     }
 
     public void PrintChar() => this.AddInstruction("putchar");
+    public void ReadChar() => this.AddInstruction("readchar");
+
+    public void Allocate() => this.AddInstruction("alloc");
+    public void Allocate(int bytes) {
+        this.PushInt32(bytes);
+        this.AddInstruction("alloc");
+    }
+    public void Free() {
+        this.AddInstruction("free");
+    }
 }
