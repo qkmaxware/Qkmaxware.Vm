@@ -3,9 +3,9 @@ namespace Qkmaxware.Vm.Instructions;
 /// <summary>
 /// Compares for less than 
 /// </summary>
-public class SetLessThanI32 : Instruction {
+public class SetLtI32 : Instruction {
     
-    public SetLessThanI32() {
+    public SetLtI32() {
         // Set opcode
         this.Opcode = 0x90; 
         
@@ -25,9 +25,9 @@ public class SetLessThanI32 : Instruction {
 /// <summary>
 /// Compares for less than 
 /// </summary>
-public class SetLessThanU32 : Instruction {
+public class SetLtU32 : Instruction {
     
-    public SetLessThanU32() {
+    public SetLtU32() {
         // Set opcode
         this.Opcode = 0x91; 
         
@@ -47,9 +47,9 @@ public class SetLessThanU32 : Instruction {
 /// <summary>
 /// Compares for less than 
 /// </summary>
-public class SetLessThanF32 : Instruction {
+public class SetLtF32 : Instruction {
     
-    public SetLessThanF32() {
+    public SetLtF32() {
         // Set opcode
         this.Opcode = 0x92; 
         
@@ -69,9 +69,9 @@ public class SetLessThanF32 : Instruction {
 /// <summary>
 /// Compares for greater than 
 /// </summary>
-public class SetGreaterThanI32 : Instruction {
+public class SetGtI32 : Instruction {
     
-    public SetGreaterThanI32() {
+    public SetGtI32() {
         // Set opcode
         this.Opcode = 0x93; 
         
@@ -91,9 +91,9 @@ public class SetGreaterThanI32 : Instruction {
 /// <summary>
 /// Compares for greater than 
 /// </summary>
-public class SetGreaterThanU32 : Instruction {
+public class SetGtU32 : Instruction {
     
-    public SetGreaterThanU32() {
+    public SetGtU32() {
         // Set opcode
         this.Opcode = 0x94; 
         
@@ -113,9 +113,9 @@ public class SetGreaterThanU32 : Instruction {
 /// <summary>
 /// Compares for greater than 
 /// </summary>
-public class SetGreaterThanF32 : Instruction {
+public class SetGtF32 : Instruction {
     
-    public SetGreaterThanF32() {
+    public SetGtF32() {
         // Set opcode
         this.Opcode = 0x95; 
         
