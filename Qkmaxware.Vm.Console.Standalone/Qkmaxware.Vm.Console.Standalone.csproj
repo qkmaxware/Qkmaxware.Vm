@@ -4,7 +4,7 @@
     <AssemblyName>qkvm</AssemblyName>
     <ToolCommandName>qkvm</ToolCommandName>
     <AssemblyTitle>Qkmaxware Bytecode Virtual Machine</AssemblyTitle>
-    <Version>1.0.1</Version>
+    <Version>1.1.0</Version>
     <Author>Colin</Author>
     <Company>Colin</Company>
     <OutputType>Exe</OutputType>
