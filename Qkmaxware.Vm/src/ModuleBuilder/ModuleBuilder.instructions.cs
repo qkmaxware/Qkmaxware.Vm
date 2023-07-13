@@ -95,7 +95,26 @@ public partial class ModuleBuilder {
 
     public void ObjectSize() => this.AddInstruction("sizeof");
     public void ArrayLength() => this.AddInstruction("len");
-    public void GetArrayElement(int index) => this.AddInstruction("get_element", Operand.From(index));
+    public void SetArrayElement() {
+        this.AddInstruction("set_element");
+    }
+    public void SetArrayElement(int index, int value) {
+        this.PushInt32(index);
+        this.PushInt32(value);
+        this.AddInstruction("set_element");
+    }
+    public void GetArrayElement() {
+        this.AddInstruction("get_element");
+    }
+    public void GetArrayElement(int index) {
+        this.PushInt32(index);
+        this.AddInstruction("get_element");
+    }
+    public void GetArrayElement(ConstantRef @ref, int index) {
+        this.PushConstant(@ref);
+        this.PushInt32(index);
+        this.AddInstruction("get_element");
+    }
 
 
     public void Goto(long anchor) {
@@ -171,5 +190,45 @@ public partial class ModuleBuilder {
     }
     public void Free() {
         this.AddInstruction("free");
+    }
+
+    public void LessThanI32() {
+        this.AddInstruction("set_lt_i32");
+    }
+    public void LessThanU32() {
+        this.AddInstruction("set_lt_u32");
+    }
+    public void LessThanF32() {
+        this.AddInstruction("set_lt_f32");
+    }
+
+    public void GreaterThanI32() {
+        this.AddInstruction("set_gt_i32");
+    }
+    public void GreaterThanU32() {
+        this.AddInstruction("set_gt_u32");
+    }
+    public void GreaterThanF32() {
+        this.AddInstruction("set_gt_f32");
+    }
+
+    public void EqualsI32() {
+        this.AddInstruction("set_eq_i32");
+    }
+    public void EqualsU32() {
+        this.AddInstruction("set_eq_u32");
+    }
+    public void EqualsF32() {
+        this.AddInstruction("set_eq_f32");
+    }
+
+    public void NotEqualsI32() {
+        this.AddInstruction("set_neq_i32");
+    }
+    public void NotEqualsU32() {
+        this.AddInstruction("set_neq_u32");
+    }
+    public void NotEqualsF32() {
+        this.AddInstruction("set_neq_f32");
     }
 }

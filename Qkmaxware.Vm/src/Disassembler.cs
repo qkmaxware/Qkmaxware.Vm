@@ -57,7 +57,7 @@ public class Disassembler {
                 // Fetch args
                 var instr = InstructionMap.Instance[opcode];
                 if (instr == null) {
-                    throw new ArgumentException($"Unknown operation with opcode 'opcode' at position 0x{instr_number:x}");
+                    throw new ArgumentException($"Unknown operation with opcode '{opcode}' at position 0x{instr_number:x}");
                 }
                 List<VmValue> arg_values = new List<VmValue>(instr.Arity);
                 foreach (var arg in instr.Arguments) {

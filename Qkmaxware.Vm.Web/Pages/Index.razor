@@ -341,6 +341,7 @@ export ""Main""
 
             using (var stream = new MemoryStream()) {
                 var writer = new BinaryWriter(stream);
+                module.EncodeFile(writer);
 
                 writer.Flush();
                 stream.Position = 0;

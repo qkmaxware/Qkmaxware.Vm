@@ -48,6 +48,11 @@ public class Describe : BaseCommand {
         var dis = new Disassembler();
         Console.WriteLine($"Code ({module.CodeLength} bytes):");
         foreach (var line in dis.DisassembleCode(module)) {
+            foreach (var export in module.Exports) {
+                if (export.CodePosition == line.MemoryOffset) {
+                    Console.WriteLine($"  {export.Name}:");
+                }
+            }
             Console.Write("    0x");
             Console.Write($"{line.MemoryOffset:X}".PadRight(6));
             Console.Write(' ');
