@@ -47,6 +47,11 @@ public class Linker {
         var constantPoolOffset = combined.ConstantPoolCount;
         combined.ConstantPool.AddRange(auxillary.ConstantPool);
 
+        // Join static pool
+        combined.StaticPool.AddRange(primary.StaticPool);
+        var staticPoolOffset = combined.StaticPool.Count;
+        combined.StaticPool.AddRange(auxillary.StaticPool);
+
         // Join code
         var dis = new Disassembler();
         using var builder = new ModuleBuilder();
@@ -78,7 +83,13 @@ public class Linker {
                 // Re-write the index
                 var new_index = Operand.From(((Operand)instr.Arguments.ElementAt(0)).Int32 + constantPoolOffset);
                 builder.AddInstruction(instr.Instruction, new VmValue[]{ new_index });
-            } else if (instr.Instruction is CallExternal) {
+            } 
+            else if (instr.Instruction is LoadStatic || instr.Instruction is StoreStatic) {
+                // Re-write the index
+                var new_index = Operand.From(((Operand)instr.Arguments.ElementAt(0)).Int32 + staticPoolOffset);
+                builder.AddInstruction(instr.Instruction, new VmValue[]{ new_index });
+            }
+            else if (instr.Instruction is CallExternal) {
                 // See if we can convert this to a pure call
                 var index = ((Operand)instr.Arguments[0]);
                 var args = ((Operand)instr.Arguments[1]);
