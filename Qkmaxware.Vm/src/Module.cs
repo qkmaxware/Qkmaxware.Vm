@@ -23,6 +23,9 @@ public class Module {
 
     public int ConstantPoolCount => ConstantPool.Count;
     public ConstantPool ConstantPool {get; private set;} = new ConstantPool();
+
+    public int StaticPoolCount => StaticPool.Count;
+    public StaticPool StaticPool {get; private set;} = new StaticPool();
     #endregion
 
     public void EncodeFile(BinaryWriter writer) {
@@ -72,6 +75,12 @@ public class Module {
 
             // Write constant data
             data.Encode(writer);
+        }
+
+        writer.Write(this.StaticPoolCount);
+        foreach (var data in this.StaticPool) {
+            // Write constant data
+            writer.Write(data.UInt32);
         }
     }
 }

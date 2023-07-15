@@ -56,5 +56,13 @@ internal class Module1xDecoder : IModuleDecoder {
             var constant = typeInfo.Decode(reader);
             module.ConstantPool.Add(constant);
         }
+
+        count = reader.ReadInt32();
+        module.StaticPool.EnsureCapacity(count);
+        for (var i = 0; i < count; i++) {
+            // Read static value
+            var value = reader.ReadUInt32();
+            module.StaticPool.Add(Operand.From(value));
+        }
     }
 }

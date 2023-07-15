@@ -9,6 +9,9 @@ public class ConstantPool : IEnumerable<ConstantData> {
     public int Count => elements.Count;
 
     public ConstantData this[int index] => elements[index];
+    public ConstantData this[StaticRef index] {
+        get => elements[index.PoolIndex];
+    }
 
     public void EnsureCapacity(int size) {
         this.elements.EnsureCapacity(size);

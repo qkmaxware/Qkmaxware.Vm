@@ -93,6 +93,19 @@ public partial class ModuleBuilder {
     public void PowerFloat32() => this.AddInstruction("pow_f32");
     public void NegateFloat32() => this.AddInstruction("neg_f32");
 
+    public void SetLessThanInt32() => this.AddInstruction("set_lt_i32");
+    public void SetLessThanUInt32() => this.AddInstruction("set_lt_u32");
+    public void SetLessThanFloat32() => this.AddInstruction("set_lt_f2");
+    public void SetGreaterThanInt32() => this.AddInstruction("set_gt_i32");
+    public void SetGreaterThanUInt32() => this.AddInstruction("set_gt_u32");
+    public void SetGreaterThanFloat32() => this.AddInstruction("set_gt_f32");
+    public void SetEqualThanInt32() => this.AddInstruction("set_eq_i32");
+    public void SetEqualThanUInt32() => this.AddInstruction("set_eq_u32");
+    public void SetEqualThanFloat32() => this.AddInstruction("set_eq_f32");
+    public void SetNotEqualThanInt32() => this.AddInstruction("set_neq_i32");
+    public void SetNotEqualThanUInt32() => this.AddInstruction("set_neq_u32");
+    public void SetNotEqualThanFloat32() => this.AddInstruction("set_neq_f32");
+
     public void ObjectSize() => this.AddInstruction("sizeof");
     public void ArrayLength() => this.AddInstruction("len");
     public void SetArrayElement() {

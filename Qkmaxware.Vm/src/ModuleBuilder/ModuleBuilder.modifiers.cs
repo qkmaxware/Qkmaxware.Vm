@@ -199,6 +199,16 @@ public partial class ModuleBuilder {
     }
 
     /// <summary>
+    /// Add a value to the static pool
+    /// </summary>
+    /// <param name="value">value to add</param>
+    public StaticRef AddStatic(Operand value) {
+        var index = statics.Count;
+        this.statics.Add(value);
+        return new StaticRef(index);
+    }
+
+    /// <summary>
     /// Append the contents of this module into this builder
     /// </summary>
     /// <param name="module">module to append</param>

@@ -15,6 +15,11 @@ public class RuntimeEnvironment {
     /// <returns>constants</returns>
     public ConstantPool ConstantPool {get; private set;} = new ConstantPool();
     /// <summary>
+    /// Pool of static variables accessible to the runtime
+    /// </summary>
+    /// <value>static variabels</value>
+    public StaticPool StaticPool {get; private set;} = new StaticPool();
+    /// <summary>
     /// Current operands on stack
     /// </summary>
     /// <returns>stack</returns>
@@ -32,6 +37,7 @@ public class RuntimeEnvironment {
 
     public RuntimeEnvironment(Module module, HostInterface @interface, IRandomAccessMemory heap) {
         this.Host = @interface;
+        this.StaticPool = module.StaticPool.Clone();
         this.ConstantPool = module.ConstantPool;
         this.Heap = heap;
     }
