@@ -169,7 +169,7 @@ public partial class ModuleBuilder {
     }
 
     public void Call(Label l, int argc) {
-        this.AddInstruction("call", new VmValue[]{Operand.From((int)(l.CodePosition - (this.Anchor() + 5))), Operand.From(argc)});
+        this.AddInstruction("call", new VmValue[]{Operand.From((int)(l.CodePosition - (this.Anchor() + 9))), Operand.From(argc)});
     }
     public void Call(int offset, int argc) {
         this.AddInstruction("call", new VmValue[]{Operand.From(offset), Operand.From(argc)});
