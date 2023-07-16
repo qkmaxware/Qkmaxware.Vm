@@ -1,9 +1,11 @@
+using System.Collections;
+
 namespace Qkmaxware.Vm;
 
 /// <summary>
 /// Operand stack of the virtual machine
 /// </summary>
-public class OperandStack {
+public class OperandStack : IEnumerable<Operand> {
 
     private List<Operand> stack = new List<Operand>();
 
@@ -81,5 +83,13 @@ public class OperandStack {
         if (abs_index < 0 || abs_index >= SP)
             throw new IndexOutOfRangeException();
         stack[abs_index] = operand;
+    }
+
+    public IEnumerator<Operand> GetEnumerator() {
+        return this.stack.GetEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator() {
+        return this.stack.GetEnumerator();
     }
 }
