@@ -3,10 +3,14 @@ namespace Qkmaxware.Vm.Test;
 [TestClass]
 public class LinearByteArrayMemoryTester {
 
+    private IEnumerable<AllocatedMemoryBlock> enumerateBlocks(IRandomAccessMemory mem) {
+        return new HeapBlockIterator(mem);
+    }
+
     [TestMethod]
     public void TestReserve() {
         var memory = new LinearByteArrayMemory(DataSize.Bytes(128));
-        var blocks = memory.EnumerateBlocks().ToList();
+        var blocks = enumerateBlocks(memory).ToList();
         Assert.AreEqual(1, blocks.Count);
         Assert.AreEqual(true, blocks[0].IsFree);
         Assert.AreEqual(128 - 5, blocks[0].Size.ByteCount);
@@ -17,14 +21,14 @@ public class LinearByteArrayMemoryTester {
         Console.WriteLine("After 64 Reserved: ");
         Console.WriteLine(memory);
 
-        blocks = memory.EnumerateBlocks().ToList();
+        blocks = enumerateBlocks(memory).ToList();
         Assert.AreEqual(2, blocks.Count);
         Assert.AreEqual(false, blocks[0].IsFree);
         Assert.AreEqual(64, blocks[0].Size.ByteCount);
         Assert.AreEqual(true, blocks[1].IsFree);
 
         memory.Reserve(byteCount: 32);
-        blocks = memory.EnumerateBlocks().ToList();
+        blocks = enumerateBlocks(memory).ToList();
         Console.WriteLine("After 32 Reserved: ");
         Console.WriteLine(memory);
         Assert.AreEqual(3, blocks.Count);
@@ -38,7 +42,7 @@ public class LinearByteArrayMemoryTester {
     [TestMethod]
     public void TestFree() {
         var memory = new LinearByteArrayMemory(DataSize.Bytes(128));
-        var blocks = memory.EnumerateBlocks().ToList();
+        var blocks = enumerateBlocks(memory).ToList();
         Assert.AreEqual(1, blocks.Count);
         Assert.AreEqual(true, blocks[0].IsFree);
         Assert.AreEqual(128 - 5, blocks[0].Size.ByteCount);
@@ -48,7 +52,7 @@ public class LinearByteArrayMemoryTester {
         var three = memory.Reserve(byteCount: 16);
         var four = memory.Reserve(byteCount: 16);
 
-        blocks = memory.EnumerateBlocks().ToList();
+        blocks = enumerateBlocks(memory).ToList();
         Console.WriteLine(string.Join(System.Environment.NewLine, blocks));
         Console.WriteLine("1----------------------");
         Assert.AreEqual(5, blocks.Count);
@@ -60,7 +64,7 @@ public class LinearByteArrayMemoryTester {
         var sizeBefore = blocks[4].Size.ByteCount;
 
         memory.Free(blocks[3]);
-        blocks = memory.EnumerateBlocks().ToList();
+        blocks = enumerateBlocks(memory).ToList();
         Console.WriteLine(string.Join(System.Environment.NewLine, blocks));
         Console.WriteLine("2----------------------");
         Assert.AreEqual(4, blocks.Count);
@@ -73,7 +77,7 @@ public class LinearByteArrayMemoryTester {
         Assert.AreEqual(true, sizeAfter > sizeBefore);
 
         memory.Free(blocks[1]);
-        blocks = memory.EnumerateBlocks().ToList();
+        blocks = enumerateBlocks(memory).ToList();
         Console.WriteLine(string.Join(System.Environment.NewLine, blocks));
         Console.WriteLine("3----------------------");
         Assert.AreEqual(4, blocks.Count);
@@ -83,7 +87,7 @@ public class LinearByteArrayMemoryTester {
         Assert.AreEqual(true, blocks[3].IsFree);
 
         memory.Free(blocks[0]);
-        blocks = memory.EnumerateBlocks().ToList();
+        blocks = enumerateBlocks(memory).ToList();
         Console.WriteLine(string.Join(System.Environment.NewLine, blocks));
         Console.WriteLine("4----------------------");
         Assert.AreEqual(3, blocks.Count);

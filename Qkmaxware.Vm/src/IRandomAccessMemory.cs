@@ -37,6 +37,11 @@ public class AllocatedMemoryBlock {
 /// </summary>
 public interface IRandomAccessMemory {
     /// <summary>
+    /// Total size of the memory
+    /// </summary>
+    /// <value>data size</value>
+    public DataSize Size {get;}
+    /// <summary>
     /// Reserve or allocate the given number of bytes
     /// </summary>
     /// <returns>starting byte address</returns>
@@ -47,6 +52,10 @@ public interface IRandomAccessMemory {
     /// </summary>
     /// <param name="address">address to the start of a reserved block</param>
     public void Free(int address);
+    /// <summary>
+    /// Size of each data block's header if applicable
+    /// </summary>
+    public DataSize BlockHeaderSize {get;}
     /// <summary>
     /// Block info for the block at the given address
     /// </summary>

@@ -22,6 +22,14 @@ public class DataSize : IParsable<DataSize> {
         this.ByteCount = bytes;
     }
 
+    public static DataSize operator + (DataSize lhs, DataSize rhs) {
+        return DataSize.Bytes(lhs.ByteCount + rhs.ByteCount);
+    }
+
+    public static DataSize operator - (DataSize lhs, DataSize rhs) {
+        return DataSize.Bytes(Math.Max(0, lhs.ByteCount - rhs.ByteCount));
+    }
+
     // B or byte or bytes
     [DataSizeUnit("B")]
     [DataSizeUnit("byte")]

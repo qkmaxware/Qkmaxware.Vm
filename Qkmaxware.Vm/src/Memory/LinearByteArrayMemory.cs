@@ -8,6 +8,10 @@ namespace Qkmaxware.Vm;
 public class LinearByteArrayMemory : IRandomAccessMemory {
 
     public DataSize Size {get; private set;}
+    /// <summary>
+    /// Size of each data block's header if applicable
+    /// </summary>
+    public DataSize BlockHeaderSize {get;}
     private byte[] buffer;
     private BinaryReader reader;
     private BinaryWriter writer;
@@ -16,13 +20,14 @@ public class LinearByteArrayMemory : IRandomAccessMemory {
 
     public LinearByteArrayMemory(DataSize heapSize) {
         this.Size = heapSize; 
-        this.buffer = new byte[Math.Max(this.Size.ByteCount, 5)];// At least 5 bytes for the header
+        this.BlockHeaderSize = DataSize.Bytes(sizeof(byte) + sizeof(int)); // At least 5 bytes for the header
+        this.buffer = new byte[Math.Max(this.Size.ByteCount, BlockHeaderSize.ByteCount)];
         var stream = new MemoryStream(buffer);
         this.reader = new BinaryReader(stream);
         this.writer = new BinaryWriter(stream);
 
         writer.Write((byte)0x0); // Free Tag
-        writer.Write(buffer.Length - 5);
+        writer.Write(buffer.Length - BlockHeaderSize.ByteCount);
     }
 
     public int Reserve(int byteCount) {
@@ -31,21 +36,19 @@ public class LinearByteArrayMemory : IRandomAccessMemory {
             var tag = reader.ReadByte();
             var size = reader.ReadInt32();
 
-            //Console.WriteLine("At 0x" + i.ToString("X") + " " + size + "bytes are " + (tag == 0x0 ? "free" : "reserved"));
-
             // Load tag
             if (tag == 0x0) {
                 // Free space
-                if (size > (byteCount + 5)) {
+                if (size > (byteCount + BlockHeaderSize.ByteCount)) {
                     // Consume this space
                     writer.BaseStream.Position = i;
                     writer.Write((byte)0x1);
                     writer.Write(byteCount);
 
-                    // Create the empty block
-                    writer.BaseStream.Position = i + byteCount + 5;
+                    // Create the empty block at the end of this space
+                    writer.BaseStream.Position += byteCount;
                     writer.Write((byte)0x0);
-                    writer.Write(size - byteCount);
+                    writer.Write(size - byteCount - BlockHeaderSize.ByteCount);
 
                     return i;
                 } 
@@ -75,24 +78,37 @@ public class LinearByteArrayMemory : IRandomAccessMemory {
     }
 
     public void Free(int address) {
-        writer.BaseStream.Position = address;
-        // Clear the tag (free memory)
-        writer.Write((byte)0x0);
-        var size = reader.ReadInt32();
-
-        // Check the next block if it exists
-        reader.BaseStream.Position += size;
-        if (reader.BaseStream.Position < this.buffer.Length) {
-            var next_block_tag = reader.ReadByte();
-            if (next_block_tag == 0x0) {
-                // Next block is also free, merge blocks
-                const int next_block_header_size = 5;
-                var next_block_size = reader.ReadInt32();
-                writer.BaseStream.Position = address;
-                writer.Write((byte)0x0);
-                writer.Write(size + next_block_size + next_block_header_size);
+        AllocatedMemoryBlock? prev = null;
+        AllocatedMemoryBlock? current = null;
+        AllocatedMemoryBlock? next = null;
+        foreach (var block in new HeapBlockIterator(this)) {
+            if (block.Address == address) {
+                current = block;
+            } else if (current == null) {
+                prev = block;
+            } else if (current != null) {
+                next = block;
+                break;
             }
         }
+        if (current == null)
+            return;
+
+        // Compute the size of the new free'd area
+        AllocatedMemoryBlock startAt = current;
+        DataSize freeSpace = current.Size;
+        if (prev != null && prev.IsFree) {
+            startAt = prev;
+            freeSpace += prev.Size + BlockHeaderSize; // Eat the header of the current block;
+        }
+        if (next != null && next.IsFree) {
+            freeSpace += next.Size + BlockHeaderSize; // Eat the next block and it's header
+        }
+
+        // Clear the tag (free memory)
+        writer.BaseStream.Position = startAt.Address;
+        writer.Write((byte)0x0);
+        writer.Write(freeSpace.ByteCount); // off by 30 bytes
     }
 
     /// <summary>
@@ -111,18 +127,6 @@ public class LinearByteArrayMemory : IRandomAccessMemory {
         );
     }
 
-    public IEnumerable<AllocatedMemoryBlock> EnumerateBlocks() {
-        for (int i = 0; i < buffer.Length; i++) {
-            reader.BaseStream.Position = i;
-            var tag = reader.ReadByte();
-            var size = reader.ReadInt32();
-
-            yield return BlockInfo(i);
-
-            i = (int)reader.BaseStream.Position + size - 1;
-        }
-    }
-
     public byte ReadByte(int address) {
         return buffer[address];
     }
@@ -133,7 +137,7 @@ public class LinearByteArrayMemory : IRandomAccessMemory {
     /// <param name="address">word start address</param>
     /// <returns>word</returns>
     public uint ReadWord32(int address) {
-        this.reader.BaseStream.Position = address + 5; // 5 bytes skip block header
+        this.reader.BaseStream.Position = address + BlockHeaderSize.ByteCount; // 5 bytes skip block header
         return reader.ReadUInt32();
     }
 
@@ -148,7 +152,7 @@ public class LinearByteArrayMemory : IRandomAccessMemory {
     /// <param name="value">value to write</param>
     /// <returns>word</returns>
     public void WriteWord32(int address, uint value) {
-        this.writer.BaseStream.Position = address + 5;  // 5 bytes skip block header
+        this.writer.BaseStream.Position = address + BlockHeaderSize.ByteCount;  // 5 bytes skip block header
         writer.Write(value);
     }
 
