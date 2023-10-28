@@ -35,6 +35,18 @@ public interface IInstruction {
     public IEnumerable<Argument> Arguments {get;}
 
     /// <summary>
+    /// The stack requirements for this instruction
+    /// </summary>
+    /// <value>names of stack elements, last element is the top of the stack</value>
+    public IEnumerable<string> StackInputs {get;}
+
+    /// <summary>
+    /// The resulting stack after the instruction is executed
+    /// </summary>
+    /// <value>names of stack elements, last element is the top of the stack</value>
+    public IEnumerable<string> StackOutputs {get;}
+
+    /// <summary>
     /// The action that this instruction performs
     /// </summary>
     /// <param name="args">read argument values mapped 1-to-1 with the arguments from the Arguments property</param>

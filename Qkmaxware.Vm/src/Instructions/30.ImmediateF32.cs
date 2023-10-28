@@ -11,6 +11,9 @@ public class ImmediateF32 : Instruction {
         
         // Arguments
         this.AddArgument(new Float32Argument("Immediate Value"));
+
+        // Stack
+        this.AddStackReturn("value");
     }
 
     public override string Description => "Push an immediate floating-point value on top of the operand stack.";

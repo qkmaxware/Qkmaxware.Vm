@@ -10,6 +10,10 @@ public class ComplementI32 : Instruction {
         this.Opcode = 0x1E; 
         
         // Arguments
+
+        // Stack
+        this.AddStackOperand("operand");
+        this.AddStackReturn("result");
     }
 
     public override string Description => "Bitwise complement of the integer value on top of the operand stack";

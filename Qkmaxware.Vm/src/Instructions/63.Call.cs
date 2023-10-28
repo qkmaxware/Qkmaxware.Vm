@@ -12,6 +12,8 @@ public class Call : Instruction {
         // Arguments
         this.AddArgument(new Int32Argument("Offset"));
         this.AddArgument(new Int32Argument("Argument Count"));
+
+        // Stack
     }
 
     public override string Description => "Call a subprogram in the program at PC + Offset using the last few vales on the operand stack as the subprogram arguments.";

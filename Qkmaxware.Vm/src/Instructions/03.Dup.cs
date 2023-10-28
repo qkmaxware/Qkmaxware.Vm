@@ -10,6 +10,11 @@ public class Dup : Instruction {
         this.Opcode = 0x03; 
         
         // Arguments
+
+        // Stack
+        this.AddStackOperand("value");
+        this.AddStackReturn("value");
+        this.AddStackReturn("value");
     }
 
     public override string Description => "Duplicate the element at the top of the operand stack.";

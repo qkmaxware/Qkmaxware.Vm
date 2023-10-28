@@ -26,6 +26,11 @@ public class OperandStack : IEnumerable<Operand> {
     public Operand? PeekTop() => IsEmpty ? null : stack[stack.Count - 1];
 
     /// <summary>
+    /// Peek at the top of the stack (as a property)
+    /// </summary>
+    public Operand? Top => PeekTop();
+
+    /// <summary>
     /// Pop the operand off the top of the stack and return it
     /// </summary>
     /// <returns>operand at the stack top if it exists or an exception is thrown</returns>

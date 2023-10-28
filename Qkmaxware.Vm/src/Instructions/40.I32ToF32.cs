@@ -10,6 +10,10 @@ public class I32ToF32 : Instruction {
         this.Opcode = 0x40; 
         
         // Arguments
+
+        // Stack
+        this.AddStackOperand("i32");
+        this.AddStackReturn("f32");
     }
 
     public override string Description => "Convert the top of the stack from an 32bit integer to a 32bit floating point number.";

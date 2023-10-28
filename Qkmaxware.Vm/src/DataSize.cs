@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 using System.Reflection;
+using System.ComponentModel;
 
 namespace Qkmaxware.Vm;
 
@@ -18,6 +19,8 @@ internal class DataSizeUnit : Attribute {
 public class DataSize : IParsable<DataSize> {
     public int ByteCount {get; private set;}
 
+    public static readonly DataSize Zero = DataSize.Bytes(0);
+
     private DataSize(int bytes) {
         this.ByteCount = bytes;
     }
@@ -28,6 +31,45 @@ public class DataSize : IParsable<DataSize> {
 
     public static DataSize operator - (DataSize lhs, DataSize rhs) {
         return DataSize.Bytes(Math.Max(0, lhs.ByteCount - rhs.ByteCount));
+    }
+
+    public static bool operator == (DataSize lhs, DataSize rhs) {
+        return lhs.ByteCount == rhs.ByteCount;
+    }
+    public static bool operator != (DataSize lhs, DataSize rhs) {
+        return lhs.ByteCount != rhs.ByteCount;
+    }
+    public static bool operator > (DataSize lhs, DataSize rhs) {
+        return lhs.ByteCount > rhs.ByteCount;
+    }
+    public static bool operator < (DataSize lhs, DataSize rhs) {
+        return lhs.ByteCount < rhs.ByteCount;
+    }
+
+    public static DataSize SmallestOf(params DataSize[] sizes) {
+        if (sizes.Length == 0)
+            return DataSize.Bytes(0);
+        var smallest = sizes[0];
+        for (var i = 1; i < sizes.Length; i++) {
+            var size = sizes[i];
+            if (size < smallest) {
+                smallest = size;
+            }
+        }
+        return smallest;
+    }
+
+    public static DataSize LargestOf(params DataSize[] sizes) {
+        if (sizes.Length == 0)
+            return DataSize.Bytes(0);
+        var largest = sizes[0];
+        for (var i = 1; i < sizes.Length; i++) {
+            var size = sizes[i];
+            if (size > largest) {
+                largest = size;
+            }
+        }
+        return largest;
     }
 
     // B or byte or bytes
@@ -149,5 +191,25 @@ public class DataSize : IParsable<DataSize> {
         result = size;
         return true;
         #nullable restore
+    }
+
+    public override bool Equals(object? obj) {
+        if (ReferenceEquals(this, obj)){
+            return true;
+        }
+
+        if (ReferenceEquals(obj, null)) {
+            return false;
+        }
+
+        if (obj is DataSize other) {
+            return this.ByteCount == other.ByteCount;
+        } else {
+            return false;
+        }
+    }
+
+    public override int GetHashCode() {
+        return this.ByteCount;
     }
 }

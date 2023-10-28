@@ -10,6 +10,8 @@ public class ReturnFunction : Instruction {
         this.Opcode = 0x65; 
         
         // Arguments
+
+        // Stack
     }
 
     public override string Description => "Return from a subprogram to it's original call location preserving the top of the operand stack as a returned value.";

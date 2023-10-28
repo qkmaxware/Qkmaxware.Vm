@@ -7,7 +7,7 @@ public class Module {
     #region Module Header Properties
     private static readonly byte[] Magic = new byte[]{(byte)'q', (byte)'k', (byte)'b', (byte)'c'};
     public static IEnumerable<byte> MagicNumbers => Array.AsReadOnly(Magic);
-    public static int MajorVersion {get; private set;} = 1;
+    public static int MajorVersion {get; private set;} = 2;
     public static int MinorVersion {get; private set;} = 0;
     #endregion
 
@@ -21,11 +21,8 @@ public class Module {
     public int CodeLength => Code.Count;
     public List<byte> Code {get; private set;} = new List<byte>();
 
-    public int ConstantPoolCount => ConstantPool.Count;
-    public ConstantPool ConstantPool {get; private set;} = new ConstantPool();
-
-    public int StaticPoolCount => StaticPool.Count;
-    public StaticPool StaticPool {get; private set;} = new StaticPool();
+    public int MemoryCount => Memories.Count;
+    public List<MemorySpec> Memories {get; private set;} = new List<MemorySpec>();
     #endregion
 
     public void EncodeFile(BinaryWriter writer) {
@@ -68,19 +65,10 @@ public class Module {
             writer.Write(b);
         }
 
-        writer.Write(this.ConstantPoolCount);
-        foreach (var data in this.ConstantPool) {
-            // Write constant info header
-            writer.Write(data.TypeInfo.TypeTag);
-
+        writer.Write(this.MemoryCount);
+        foreach (var memory in this.Memories) {
             // Write constant data
-            data.Encode(writer);
-        }
-
-        writer.Write(this.StaticPoolCount);
-        foreach (var data in this.StaticPool) {
-            // Write constant data
-            writer.Write(data.UInt32);
+            memory.Encode(writer);
         }
     }
 }

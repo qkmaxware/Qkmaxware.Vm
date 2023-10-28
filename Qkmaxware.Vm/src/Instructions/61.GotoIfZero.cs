@@ -11,6 +11,9 @@ public class GotoIfZero : Instruction {
         
         // Arguments
         this.AddArgument(new Int32Argument("Offset"));
+
+        // Stack
+        this.AddStackOperand("condition");
     }
 
     public override string Description => "If the top of the stack is an integer equal to 0 then jump to another position in the program at PC + Offset.";

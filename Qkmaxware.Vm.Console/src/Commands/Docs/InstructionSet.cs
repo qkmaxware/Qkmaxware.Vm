@@ -26,6 +26,10 @@ public class InstructionSetDocument : GeneratedDocument {
                 writer.Write(")");
             }
             writer.WriteLine();
+            writer.Write(tab); writer.WriteLine("stack:");
+            writer.Write(tab); writer.Write(tab); 
+                writer.Write('['); writer.Write(string.Join(',', instr.StackInputs)); writer.Write("] -> ["); writer.Write(string.Join(',', instr.StackOutputs)); writer.Write(']');
+            writer.WriteLine();
             writer.WriteLine();
         }
     }

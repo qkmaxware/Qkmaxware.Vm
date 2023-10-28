@@ -10,6 +10,11 @@ public class AndI32 : Instruction {
         this.Opcode = 0x1B; 
         
         // Arguments
+
+        // Stack
+        this.AddStackOperand("lhs");
+        this.AddStackOperand("rhs");
+        this.AddStackReturn("result");
     }
 
     public override string Description => "Bitwise AND between 2 integers at the top of the operand stack";

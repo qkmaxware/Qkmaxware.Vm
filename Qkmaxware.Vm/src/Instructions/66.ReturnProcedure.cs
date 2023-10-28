@@ -10,6 +10,8 @@ public class ReturnProcedure : Instruction {
         this.Opcode = 0x66; 
         
         // Arguments
+
+        // Stack
     }
 
     public override string Description => "Return from a subprogram to it's original call location with no return value.";

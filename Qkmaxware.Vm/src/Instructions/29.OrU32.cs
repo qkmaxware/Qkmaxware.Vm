@@ -10,6 +10,11 @@ public class OrU32 : Instruction {
         this.Opcode = 0x29; 
         
         // Arguments
+
+        // Stack
+        this.AddStackOperand("lhs");
+        this.AddStackOperand("rhs");
+        this.AddStackReturn("result");
     }
 
     public override string Description => "Bitwise OR between 2 unsigned integers at the top of the operand stack";

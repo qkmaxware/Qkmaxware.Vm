@@ -25,12 +25,9 @@ public class Run : BaseCommand {
         using var reader = new BinaryReader(File.OpenRead(this.FileName));
         var module = loader.FromStream(reader);
 
-        var heap = new LinearByteArrayMemory(DataSize.Parse(this.HeapSize ?? string.Empty, null));
-
         if (!Interactive) {
             var vm = new Machine(
-                host: HostInterface.Default(),
-                heap: heap
+                host: HostInterface.Default()
             );
             var thread = vm.LoadProgram(module);
             thread.RunUntilComplete();
@@ -41,8 +38,7 @@ public class Run : BaseCommand {
                 stdout: new StringWriter(sb)
             );
             var vm = new Machine(
-                host: host,
-                heap: heap
+                host: host
             );
             var thread = vm.LoadProgram(module);
             var col = Console.CursorLeft;
@@ -122,6 +118,7 @@ public class Run : BaseCommand {
                     Console.WriteLine("- run until breakpoint");
                     Console.WriteLine("- breakpoint add");
                     Console.WriteLine("- breakpoint remove");
+                    Console.WriteLine("- memdump");
                     Console.WriteLine("- exit");
 
                     Console.WriteLine();
@@ -148,6 +145,16 @@ public class Run : BaseCommand {
                             long bpr = 0;
                             long.TryParse(Console.ReadLine(), out bpr);
                             thread.RemoveBreakpoint(bpr);
+                            break;
+                        case "memdump":
+                            Console.WriteLine();
+                            Console.WriteLine("Memories");
+                            int memIdx = 0;
+                            foreach (var memory in thread.Environment.Memories) {
+                                Console.WriteLine(" - " + (memIdx++) + ": [" + memory.ASCII + "]");
+                            }
+                            Console.WriteLine("Press any key...");
+                            Console.ReadKey();
                             break;
                         case "exit":
                         case "quit":

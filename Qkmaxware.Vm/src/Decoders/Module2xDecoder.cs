@@ -1,18 +1,8 @@
 namespace Qkmaxware.Vm;
 
-internal class Module1xDecoder : IModuleDecoder {
+internal class Module2xDecoder : IModuleDecoder {
 
-    public bool SupportsVersion(int Major, int Minor) => Major == 1;
-
-    private List<ConstantInfo> supportedConstantTypes = new List<ConstantInfo> {
-        ConstantInfo.Int32,
-        ConstantInfo.UInt32,
-        ConstantInfo.Float32,
-
-        ConstantInfo.Ascii,
-        ConstantInfo.Utf8,
-        ConstantInfo.Utf32
-    };
+    public bool SupportsVersion(int Major, int Minor) => Major == 2;
 
     public void DecodeData(Module module, BinaryReader reader) {
         // -----------------------------------------------------------
@@ -44,25 +34,9 @@ internal class Module1xDecoder : IModuleDecoder {
         }
 
         var count = reader.ReadInt32();
-        module.ConstantPool.EnsureCapacity(count);
+        module.Memories.EnsureCapacity(count);
         for (var i = 0; i < count; i++) {
-            // Read constant info header
-            var tag = reader.ReadByte();
-            
-            // Read constant value
-            var typeInfo = supportedConstantTypes.Where(info => info.TypeTag == tag).FirstOrDefault();
-            if (typeInfo == null)
-                throw new ArgumentException($"Constants of type '{tag}' are not supported in the version of Qkmaxware Bytecode");
-            var constant = typeInfo.Decode(reader);
-            module.ConstantPool.Add(constant);
-        }
-
-        count = reader.ReadInt32();
-        module.StaticPool.EnsureCapacity(count);
-        for (var i = 0; i < count; i++) {
-            // Read static value
-            var value = reader.ReadUInt32();
-            module.StaticPool.Add(Operand.From(value));
+            module.Memories.Add(MemorySpec.Decode(reader));
         }
     }
 }

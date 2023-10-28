@@ -10,6 +10,11 @@ public class PowF32 : Instruction {
         this.Opcode = 0x36; 
         
         // Arguments
+
+        // Stack
+        this.AddStackOperand("lhs");
+        this.AddStackOperand("rhs");
+        this.AddStackReturn("result");
     }
 
     public override string Description => "Arithmetic exponentiation between 2 floating-point values at the top of the operand stack";

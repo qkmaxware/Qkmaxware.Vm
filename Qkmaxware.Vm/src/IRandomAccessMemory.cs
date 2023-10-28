@@ -13,22 +13,24 @@ public class AllocatedMemoryBlock {
     /// Block start address
     /// </summary>
     /// <value>address</value>
-    public int Address {get; private set;}
+    public int BlockAddress {get; private set;}
+    public int DataAddress {get; private set;}
     /// <summary>
     /// Allocated size of the block
     /// </summary>
     /// <value>block size</value>
     public DataSize Size {get; private set;}
 
-    public AllocatedMemoryBlock(bool free, int addr, int size) {
+    public AllocatedMemoryBlock(bool free, int startAt, int dataStartAt, int size) {
         this.IsFree = free;
-        this.Address = addr;
+        this.BlockAddress = startAt;
+        this.DataAddress = dataStartAt;
         this.Size = DataSize.Bytes(size);
     }
 
     public override string ToString() {
         var status = IsFree ? "FREE" : "RESERVED";
-        return $"{status} 0x{this.Address:X}({Size})";
+        return $"{status} 0x{this.BlockAddress:X}({Size})";
     }
 }
 
@@ -42,26 +44,10 @@ public interface IRandomAccessMemory {
     /// <value>data size</value>
     public DataSize Size {get;}
     /// <summary>
-    /// Reserve or allocate the given number of bytes
+    /// Get bytes for this memory 
     /// </summary>
-    /// <returns>starting byte address</returns>
-    /// <param name="byteCount">bytes to reserve</param>
-    public int Reserve(int byteCount);
-    /// <summary>
-    /// Deallocate or free the memory reserved at address 
-    /// </summary>
-    /// <param name="address">address to the start of a reserved block</param>
-    public void Free(int address);
-    /// <summary>
-    /// Size of each data block's header if applicable
-    /// </summary>
-    public DataSize BlockHeaderSize {get;}
-    /// <summary>
-    /// Block info for the block at the given address
-    /// </summary>
-    /// <param name="address">block start address</param>
-    /// <returns>block info</returns>
-    public AllocatedMemoryBlock BlockInfo(int address);
+    /// <returns>bytes</returns>
+    public byte[] GetBytes();
     /// <summary>
     /// Read a byte from memory at the given address
     /// </summary>
@@ -69,22 +55,9 @@ public interface IRandomAccessMemory {
     /// <returns>read byte</returns>
     public byte ReadByte(int address);
     /// <summary>
-    /// Read a 32bit word starting from the given address
-    /// </summary>
-    /// <param name="address">word start address</param>
-    /// <returns>word</returns>
-    public uint ReadWord32(int address);
-    /// <summary>
     /// Write a byte to memory at the given address
     /// </summary>
     /// <param name="address">address to write byte to</param>
     /// <param name="value">value of byte to write</param>
     public void WriteByte(int address, byte value);
-    /// <summary>
-    /// Write a 32bit word starting from the given address
-    /// </summary>
-    /// <param name="address">word start address</param>
-    /// <param name="value">value to write</param>
-    /// <returns>word</returns>
-    public void WriteWord32(int address, uint value);
 }

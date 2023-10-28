@@ -10,6 +10,11 @@ public class SetLtI32 : Instruction {
         this.Opcode = 0x90; 
         
         // Arguments
+
+        // Stack
+        this.AddStackOperand("lhs");
+        this.AddStackOperand("rhs");
+        this.AddStackReturn("boolean");
     }
 
     public override string Description => "Compares the top 2 elements on the stack and returns 1 if the less than comparison holds, returns 0 otherwise.";
@@ -32,6 +37,11 @@ public class SetLtU32 : Instruction {
         this.Opcode = 0x91; 
         
         // Arguments
+
+        // Stack
+        this.AddStackOperand("lhs");
+        this.AddStackOperand("rhs");
+        this.AddStackReturn("boolean");
     }
 
     public override string Description => "Compares the top 2 elements on the stack and returns 1 if the less than comparison holds, returns 0 otherwise.";
@@ -54,6 +64,11 @@ public class SetLtF32 : Instruction {
         this.Opcode = 0x92; 
         
         // Arguments
+
+        // Stack
+        this.AddStackOperand("lhs");
+        this.AddStackOperand("rhs");
+        this.AddStackReturn("boolean");
     }
 
     public override string Description => "Compares the top 2 elements on the stack and returns 1 if the less than comparison holds, returns 0 otherwise.";
@@ -76,6 +91,11 @@ public class SetGtI32 : Instruction {
         this.Opcode = 0x93; 
         
         // Arguments
+
+        // Stack
+        this.AddStackOperand("lhs");
+        this.AddStackOperand("rhs");
+        this.AddStackReturn("boolean");
     }
 
     public override string Description => "Compares the top 2 elements on the stack and returns 1 if the greater than comparison holds, returns 0 otherwise.";
@@ -98,6 +118,11 @@ public class SetGtU32 : Instruction {
         this.Opcode = 0x94; 
         
         // Arguments
+
+        // Stack
+        this.AddStackOperand("lhs");
+        this.AddStackOperand("rhs");
+        this.AddStackReturn("boolean");
     }
 
     public override string Description => "Compares the top 2 elements on the stack and returns 1 if the greater than comparison holds, returns 0 otherwise.";
@@ -120,6 +145,11 @@ public class SetGtF32 : Instruction {
         this.Opcode = 0x95; 
         
         // Arguments
+
+        // Stack
+        this.AddStackOperand("lhs");
+        this.AddStackOperand("rhs");
+        this.AddStackReturn("boolean");
     }
 
     public override string Description => "Compares the top 2 elements on the stack and returns 1 if the greater than comparison holds, returns 0 otherwise.";
@@ -142,6 +172,11 @@ public class SetEqI32 : Instruction {
         this.Opcode = 0x96; 
         
         // Arguments
+
+        // Stack
+        this.AddStackOperand("lhs");
+        this.AddStackOperand("rhs");
+        this.AddStackReturn("boolean");
     }
 
     public override string Description => "Compares the top 2 elements on the stack and returns 1 if the equality comparison holds, returns 0 otherwise.";
@@ -164,6 +199,11 @@ public class SetEqU32 : Instruction {
         this.Opcode = 0x97; 
         
         // Arguments
+
+        // Stack
+        this.AddStackOperand("lhs");
+        this.AddStackOperand("rhs");
+        this.AddStackReturn("boolean");
     }
 
     public override string Description => "Compares the top 2 elements on the stack and returns 1 if the equality comparison holds, returns 0 otherwise.";
@@ -186,6 +226,11 @@ public class SetEqF32 : Instruction {
         this.Opcode = 0x98; 
         
         // Arguments
+
+        // Stack
+        this.AddStackOperand("lhs");
+        this.AddStackOperand("rhs");
+        this.AddStackReturn("boolean");
     }
 
     public override string Description => "Compares the top 2 elements on the stack and returns 1 if the equality comparison holds, returns 0 otherwise.";
@@ -209,6 +254,11 @@ public class SetNeqI32 : Instruction {
         this.Opcode = 0x99; 
         
         // Arguments
+
+        // Stack
+        this.AddStackOperand("lhs");
+        this.AddStackOperand("rhs");
+        this.AddStackReturn("boolean");
     }
 
     public override string Description => "Compares the top 2 elements on the stack and returns 1 if the inequality comparison holds, returns 0 otherwise.";
@@ -231,6 +281,11 @@ public class SetNeqU32 : Instruction {
         this.Opcode = 0x9A; 
         
         // Arguments
+
+        // Stack
+        this.AddStackOperand("lhs");
+        this.AddStackOperand("rhs");
+        this.AddStackReturn("boolean");
     }
 
     public override string Description => "Compares the top 2 elements on the stack and returns 1 if the inequality comparison holds, returns 0 otherwise.";
@@ -253,6 +308,11 @@ public class SetNeqF32 : Instruction {
         this.Opcode = 0x9B; 
         
         // Arguments
+
+        // Stack
+        this.AddStackOperand("lhs");
+        this.AddStackOperand("rhs");
+        this.AddStackReturn("boolean");
     }
 
     public override string Description => "Compares the top 2 elements on the stack and returns 1 if the inequality comparison holds, returns 0 otherwise.";

@@ -10,36 +10,23 @@ public class RuntimeEnvironment {
     /// <returns>interface</returns>
     public HostInterface Host {get; private set;}
     /// <summary>
-    /// Constants accessible to the runtime
-    /// </summary>
-    /// <returns>constants</returns>
-    public ConstantPool ConstantPool {get; private set;} = new ConstantPool();
-    /// <summary>
-    /// Pool of static variables accessible to the runtime
-    /// </summary>
-    /// <value>static variabels</value>
-    public StaticPool StaticPool {get; private set;} = new StaticPool();
-    /// <summary>
     /// Current operands on stack
     /// </summary>
     /// <returns>stack</returns>
     public OperandStack Stack {get; private set;} = new OperandStack();
-
     /// <summary>
-    /// Random access memory segment
+    /// List of all memories in the module
     /// </summary>
-    /// <value>heap</value>
-    public IRandomAccessMemory Heap {get; private set;} = LinearByteArrayMemory.Zero;
+    public List<Memory> Memories {get; private set;}
 
     public RuntimeEnvironment() {
         this.Host = HostInterface.Default();
+        this.Memories = new List<Memory>();
     }
 
-    public RuntimeEnvironment(Module module, HostInterface @interface, IRandomAccessMemory heap) {
+    public RuntimeEnvironment(Module module, HostInterface @interface, List<Memory> memories) {
         this.Host = @interface;
-        this.StaticPool = module.StaticPool.Clone();
-        this.ConstantPool = module.ConstantPool;
-        this.Heap = heap;
+        this.Memories = memories;
     }
 
     private ThreadOfExecution? thread;

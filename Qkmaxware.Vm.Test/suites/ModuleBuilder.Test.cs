@@ -6,6 +6,16 @@ namespace Qkmaxware.Vm.Test;
 public class ModuleBuilderTester {
 
     [TestMethod]
+    public void CreateModule() {
+        using var builder = new ModuleBuilder();
+
+        var module = builder.ToModule();
+        using (var writer = new BinaryWriter(File.OpenWrite("ModuleBuilderTester.CreateModule.qkbc"))) {
+            module.EncodeFile(writer);
+        }
+    }
+
+    [TestMethod]
     public void TestJumplessProgam() {
         using var builder = new ModuleBuilder();
 
@@ -25,7 +35,7 @@ public class ModuleBuilderTester {
             var decoded = loader.FromStream(reader);
 
             Assert.AreEqual(module.CodeLength, decoded.CodeLength);
-            Assert.AreEqual(module.ConstantPoolCount, decoded.ConstantPoolCount);
+            Assert.AreEqual(module.MemoryCount, decoded.MemoryCount);
 
             foreach (var instr in new Disassembler().DisassembleCode(module)) {
                 Console.WriteLine(instr);
@@ -56,70 +66,22 @@ public class ModuleBuilderTester {
             var decoded = loader.FromStream(reader);
 
             Assert.AreEqual(module.CodeLength, decoded.CodeLength);
-            Assert.AreEqual(module.ConstantPoolCount, decoded.ConstantPoolCount);
+            Assert.AreEqual(module.MemoryCount, decoded.MemoryCount);
 
-            Assert.IsInstanceOfType(decoded.ConstantPool[0], typeof(Int32Constant));
-            Assert.AreEqual(5, ((Int32Constant)decoded.ConstantPool[0]).Value);
-
-            Assert.IsInstanceOfType(decoded.ConstantPool[1], typeof(UInt32Constant));
-            Assert.AreEqual(8U, ((UInt32Constant)decoded.ConstantPool[1]).Value);
-
-            Assert.IsInstanceOfType(decoded.ConstantPool[2], typeof(Float32Constant));
-            Assert.AreEqual(3.14f, ((Float32Constant)decoded.ConstantPool[2]).Value);
-
-            Assert.IsInstanceOfType(decoded.ConstantPool[3], typeof(StringConstant));
-            Assert.AreEqual("Hello World", ((StringConstant)decoded.ConstantPool[3]).Value);
-        }
-    }
-
-    [TestMethod]
-    public void TestHelloWorld() {
-        using var builder = new ModuleBuilder();
-        var str = "Hello World";
-        builder.AddConstant(new StringConstant(ConstantInfo.Utf8, str));
-
-        builder.PushConstant(0);
-        for (var i = 0; i < 11; i++) {
-            builder.AddInstruction("dup");                            // Address to array
-            builder.PushInt32(i);                           // Index to character
-            builder.AddInstruction("get_element");                    // Fetch Address[Index]
-            builder.AddInstruction("putchar");                        // Print the character
-        }
-
-        var module = builder.ToModule();
-
-        using (var writer = new BinaryWriter(File.OpenWrite("ModuleBuilderTester.TestHelloWorld.qkbc"))) {
-            module.EncodeFile(writer);
-        }
-
-        var loader = new ModuleLoader();
-        using (var reader = new BinaryReader(File.OpenRead("ModuleBuilderTester.TestHelloWorld.qkbc"))) {
-            var decoded = loader.FromStream(reader);
-            foreach (var instr in new Disassembler().DisassembleCode(module)) {
-                Console.WriteLine(instr);
+            for (var i = 0; i < module.MemoryCount; i++) {
+                Assert.AreEqual(module.Memories[i].Initializer.Count, decoded.Memories[i].Initializer.Count);
             }
-
-            var sb = new StringBuilder();
-            var host = new HostInterface(
-                stdin: Console.In,
-                stdout: new StringWriter(sb)
-            );
-            var vm = new Machine(host);
-            var thread = vm.LoadProgram(decoded);
-            thread.RunUntilComplete();
-            var stdout = (sb).ToString();
-            Assert.AreEqual(str, stdout);
         }
     }
 
     [TestMethod]
-    public void TestHelloWorldMacro() {
+    public void TestHelloWorldMacro() { 
         using var builder = new ModuleBuilder();
         var str = "Hello World";
-        builder.AddConstant(new StringConstant(ConstantInfo.Utf8, str));
+        var ptr = builder.AddConstantUtf8String(str);
 
-        builder.PushConstant(0);
-        builder.PrintString();
+        builder.PushAddressOf(ptr);
+        builder.PrintString(0);
 
         var module = builder.ToModule();
         using (var writer = new BinaryWriter(File.OpenWrite("ModuleBuilderTester.TestHelloWorldMacro.qkbc"))) {

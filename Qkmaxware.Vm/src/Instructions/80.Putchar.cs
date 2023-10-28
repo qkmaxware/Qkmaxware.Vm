@@ -10,6 +10,9 @@ public class Putchar : Instruction {
         this.Opcode = 0x80; 
         
         // Arguments
+
+        // Stack
+        this.AddStackOperand("character");
     }
 
     public override string Description => "Treat the element at the top of the stack as a character and print it to the standard output device.";

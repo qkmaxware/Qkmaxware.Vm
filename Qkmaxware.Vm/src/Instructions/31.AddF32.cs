@@ -10,6 +10,11 @@ public class AddF32 : Instruction {
         this.Opcode = 0x31; 
         
         // Arguments
+
+        // Stack
+        this.AddStackOperand("lhs");
+        this.AddStackOperand("rhs");
+        this.AddStackReturn("result");
     }
 
     public override string Description => "Arithmetic addition between 2 floating-point values at the top of the operand stack";

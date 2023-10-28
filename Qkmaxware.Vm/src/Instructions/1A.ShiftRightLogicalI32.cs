@@ -10,6 +10,11 @@ public class RightShiftLogicalI32 : Instruction {
         this.Opcode = 0x1A; 
         
         // Arguments
+
+        // Stack
+        this.AddStackOperand("lhs");
+        this.AddStackOperand("rhs");
+        this.AddStackReturn("result");
     }
 
     public override string Description => "Logical right shift the elements of one integer by another";

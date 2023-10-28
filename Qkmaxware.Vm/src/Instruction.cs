@@ -34,5 +34,24 @@ public abstract class Instruction : IInstruction {
     public IEnumerable<Argument> Arguments => _arguments.AsReadOnly();
 
 
+    private List<string> _stackin = new List<string>();
+    public IEnumerable<string> StackInputs => _stackin.AsReadOnly();
+    private List<string> _stackout = new List<string>();
+    public IEnumerable<string> StackOutputs => _stackout.AsReadOnly();
+    /// <summary>
+    /// Add an operand to this instruction
+    /// </summary>
+    /// <param name="name">operand name</param>
+    protected void AddStackOperand(string name) {
+        _stackin.Add(name);
+    }
+    /// <summary>
+    /// Add an return value to this instruction
+    /// </summary>
+    /// <param name="name">operand name</param>
+    protected void AddStackReturn(string name) {
+        _stackout.Add(name);
+    }
+
     public abstract void Action (VmValue[] args, RuntimeEnvironment runtime);
 }

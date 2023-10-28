@@ -11,6 +11,8 @@ public class Exit : Instruction {
         
         // Arguments
         this.AddArgument(new Int32Argument("Status Code")); // Maybe switch to byte
+
+        // Stack
     }
 
     public override string Description => "Exit the program with the given status code. Status code 0 should indicate successful execution of the program.";

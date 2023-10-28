@@ -11,6 +11,9 @@ public class LoadLocal : Instruction {
         
         // Arguments
         this.AddArgument(new Int32Argument("Local Index"));
+
+        // Stack
+        this.AddStackReturn("local");
     }
 
     public override string Description => "In the given subprogram, load a value from a local variable onto the top of the operand stack";

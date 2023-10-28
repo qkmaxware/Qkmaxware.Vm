@@ -1,3 +1,4 @@
+using System.Reflection.Metadata;
 using Qkmaxware.Vm.Instructions;
 
 namespace Qkmaxware.Vm;
@@ -133,103 +134,27 @@ public partial class ModuleBuilder {
     }
 
     /// <summary>
-    /// Add a constant to the constant pool
-    /// </summary>
-    /// <param name="data">constant to add</param>
-    public ConstantRef AddConstant(ConstantData data) {
-        var @ref = new ConstantRef(constants.Count);
-        constants.Add(data);
-        return @ref;
-    }
-
-    /// <summary>
-    /// Add an 32bit signed integer constant to the constant pool
-    /// </summary>
-    /// <param name="value">value to add</param>
-    public ConstantRef AddConstantInt(Int32 value) {
-        return this.AddConstant(new Int32Constant(value));
-    }
-
-    /// <summary>
-    /// Add an 32bit unsigned integer constant to the constant pool
-    /// </summary>
-    /// <param name="value">value to add</param>
-    public ConstantRef AddConstantUInt(UInt32 value) {
-        return this.AddConstant(new UInt32Constant(value));
-    }
-
-    /// <summary>
-    /// Add an 32bit floating point constant to the constant pool
-    /// </summary>
-    /// <param name="value">value to add</param>
-    public ConstantRef AddConstantFloat(Single value) {
-        return this.AddConstant(new Float32Constant(value));
-    }   
-
-    /// <summary>
-    /// Add a string constant to the constant pool
-    /// </summary>
-    /// <param name="value">value to add</param>
-    public ConstantRef AddConstantAsciiString(string str) {
-        return this.AddConstant(new StringConstant(ConstantInfo.Ascii, str));
-    }
-
-    /// <summary>
-    /// Add a string constant to the constant pool terminated by the null character
-    /// </summary>
-    /// <param name="value">value to add</param>
-    public ConstantRef AddConstantAsciizString(string str) {
-        return this.AddConstant(new StringConstant(ConstantInfo.Ascii, str + '\0'));
-    }
-
-    /// <summary>
-    /// Add a string constant to the constant pool
-    /// </summary>
-    /// <param name="value">value to add</param>
-    public ConstantRef AddConstantUtf8String(string str) {
-        return this.AddConstant(new StringConstant(ConstantInfo.Utf8, str));
-    }
-
-    /// <summary>
-    /// Add a string constant to the constant pool
-    /// </summary>
-    /// <param name="value">value to add</param>
-    public ConstantRef AddConstantUtf32String(string str) {
-        return this.AddConstant(new StringConstant(ConstantInfo.Utf32, str));
-    }
-
-    /// <summary>
-    /// Add a value to the static pool
-    /// </summary>
-    /// <param name="value">value to add</param>
-    public StaticRef AddStatic(Operand value) {
-        var index = statics.Count;
-        this.statics.Add(value);
-        return new StaticRef(index);
-    }
-
-    /// <summary>
     /// Append the contents of this module into this builder
     /// </summary>
     /// <param name="module">module to append</param>
     public void Append(Module module) {
         var code_offset = this.Anchor();
-        var constant_offset = this.constants.Count;
+        var memories_offset = this._additionalMems.Count + this.AdditionalMemoryOffsetIndex;
 
         // Add imports and exports, modify exports to point to new code location
         this.imports.AddRange(module.Imports);
         this.exports.AddRange(module.Exports.Select(x => new Export(x.Name, (int)(code_offset + x.CodePosition))));
 
         // Update constant pool
-        this.constants.AddRange(module.ConstantPool);
+        this._additionalMems.AddRange(module.Memories);
 
         // Update code, point to new constants when required to.
         // Since we aren't linking we don't need to update import and export references (call external)
         var dis = new Disassembler();
         foreach (var instr in dis.DisassembleCode(module)) {
-            if (instr.Instruction is LoadConst) {
+            if (instr.Instruction is IMemoryAccessInstruction) {
                 // Re-write the index
-                var new_index = Operand.From(((Operand)instr.Arguments.ElementAt(0)).Int32 + constant_offset);
+                var new_index = Operand.From(((Operand)instr.Arguments.ElementAt(0)).Int32 + memories_offset);
                 this.AddInstruction(instr.Instruction, new VmValue[]{ new_index });
             } else {
                 this.AddInstruction(instr.Instruction, instr.Arguments.ToArray());

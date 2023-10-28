@@ -10,6 +10,10 @@ public class FlipU32 : Instruction {
         this.Opcode = 0x2B; 
         
         // Arguments
+
+        // Stack
+        this.AddStackOperand("operand");
+        this.AddStackReturn("result");
     }
 
     public override string Description => "Bitwise flip of the integer value on top of the operand stack";

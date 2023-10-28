@@ -20,3 +20,7 @@ public class MacroAttribute : Attribute {
         this.Description = description;
     }
 }
+
+public enum Extend {
+    Zero, Sign
+}

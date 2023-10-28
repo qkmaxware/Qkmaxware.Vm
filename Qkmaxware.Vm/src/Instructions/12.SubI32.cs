@@ -10,6 +10,11 @@ public class SubI32 : Instruction {
         this.Opcode = 0x12; 
         
         // Arguments
+
+        // Stack
+        this.AddStackOperand("lhs");
+        this.AddStackOperand("rhs");
+        this.AddStackReturn("result");
     }
 
     public override string Description => "Arithmetic subtraction between 2 integers at the top of the operand stack";

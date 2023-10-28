@@ -10,6 +10,12 @@ public class Swap : Instruction {
         this.Opcode = 0x02; 
         
         // Arguments
+
+        // Stack
+        this.AddStackOperand("first");
+        this.AddStackOperand("second");
+        this.AddStackReturn("second");
+        this.AddStackReturn("first");
     }
 
     public override string Description => "Swap the positions of the top 2 elements on the operand stack.";

@@ -10,6 +10,11 @@ public class RightShiftArithmeticI32 : Instruction {
         this.Opcode = 0x19; 
         
         // Arguments
+
+        // Stack
+        this.AddStackOperand("lhs");
+        this.AddStackOperand("rhs");
+        this.AddStackReturn("result");
     }
 
     public override string Description => "Arithmetic right shift the elements of one integer by another";

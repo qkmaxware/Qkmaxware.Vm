@@ -17,6 +17,7 @@
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
     <RepositoryUrl>https://github.com/qkmaxware/Qkmaxware.Vm.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+    <SelfContained>true</SelfContained>
   </PropertyGroup>
 
   <ItemGroup>

@@ -10,6 +10,11 @@ public class XorU32 : Instruction {
         this.Opcode = 0x2A; 
         
         // Arguments
+
+        // Stack
+        this.AddStackOperand("lhs");
+        this.AddStackOperand("rhs");
+        this.AddStackReturn("result");
     }
 
     public override string Description => "Bitwise Exclusive OR between 2 unsigned integers at the top of the operand stack";

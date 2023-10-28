@@ -11,6 +11,18 @@ public class DupBlock : Instruction {
         
         // Arguments
         this.AddArgument(new Int32Argument("Block Size"));
+
+        // Stack
+        this.AddStackOperand("value1");
+        this.AddStackOperand("...");
+        this.AddStackOperand("valueN");
+        
+        this.AddStackReturn("value1");
+        this.AddStackReturn("...");
+        this.AddStackReturn("valueN");
+        this.AddStackReturn("value1");
+        this.AddStackReturn("...");
+        this.AddStackReturn("valueN");
     }
 
     public override string Description => "Duplicate a block elements from the top of the operand stack.";

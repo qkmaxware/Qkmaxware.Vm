@@ -11,6 +11,9 @@ public class ImmediateI32 : Instruction {
         
         // Arguments
         this.AddArgument(new Int32Argument("Immediate Value"));
+
+        // Stack
+        this.AddStackReturn("value");
     }
 
     public override string Description => "Push an immediate integer value on top of the operand stack.";

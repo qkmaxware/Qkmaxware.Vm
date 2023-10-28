@@ -42,15 +42,10 @@ public class Linker {
         combined.Exports.AddRange(primary.Exports);
         combined.Exports.AddRange(auxillary.Exports.Select(export => new Export(export.Name, codeOffset + export.CodePosition)));
 
-        // Join constant pool
-        combined.ConstantPool.AddRange(primary.ConstantPool);
-        var constantPoolOffset = combined.ConstantPoolCount;
-        combined.ConstantPool.AddRange(auxillary.ConstantPool);
-
-        // Join static pool
-        combined.StaticPool.AddRange(primary.StaticPool);
-        var staticPoolOffset = combined.StaticPool.Count;
-        combined.StaticPool.AddRange(auxillary.StaticPool);
+        // Join memories pool
+        combined.Memories.AddRange(primary.Memories);
+        var constantPoolOffset = combined.MemoryCount;
+        combined.Memories.AddRange(auxillary.Memories);
 
         // Join code
         var dis = new Disassembler();
@@ -79,16 +74,11 @@ public class Linker {
             }
         }
         foreach (var instr in dis.DisassembleCode(auxillary)) {
-            if (instr.Instruction is LoadConst) {
+            if (instr.Instruction is IMemoryAccessInstruction) {
                 // Re-write the index
                 var new_index = Operand.From(((Operand)instr.Arguments.ElementAt(0)).Int32 + constantPoolOffset);
                 builder.AddInstruction(instr.Instruction, new VmValue[]{ new_index });
             } 
-            else if (instr.Instruction is LoadStatic || instr.Instruction is StoreStatic) {
-                // Re-write the index
-                var new_index = Operand.From(((Operand)instr.Arguments.ElementAt(0)).Int32 + staticPoolOffset);
-                builder.AddInstruction(instr.Instruction, new VmValue[]{ new_index });
-            }
             else if (instr.Instruction is CallExternal) {
                 // See if we can convert this to a pure call
                 var index = ((Operand)instr.Arguments[0]);

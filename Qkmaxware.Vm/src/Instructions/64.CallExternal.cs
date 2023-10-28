@@ -12,6 +12,8 @@ public class CallExternal : Instruction {
         // Arguments
         this.AddArgument(new Int32Argument("Import Index"));
         this.AddArgument(new Int32Argument("Argument Count"));
+
+        // Stack
     }
 
     public override string Description => "Call an imported subprogram at the given import index.";

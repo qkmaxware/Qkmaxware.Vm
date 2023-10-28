@@ -10,6 +10,10 @@ public class NegI32 : Instruction {
         this.Opcode = 0x17; 
         
         // Arguments
+
+        // Stack
+        this.AddStackOperand("operand");
+        this.AddStackReturn("result");
     }
 
     public override string Description => "Negation of the integer value on top of the operand stack";

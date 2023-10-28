@@ -11,6 +11,11 @@ public class PopN : Instruction {
         
         // Arguments
         this.AddArgument(new Int32Argument("Popped Amount"));
+
+        // Arguments
+        this.AddStackOperand("value1");
+        this.AddStackOperand("...");
+        this.AddStackOperand("valueN");
     }
 
     public override string Description => "Remove the given amount of values from the top of the operand stack.";

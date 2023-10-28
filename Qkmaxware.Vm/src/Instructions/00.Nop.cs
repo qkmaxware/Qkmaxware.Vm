@@ -10,6 +10,8 @@ public class Nop : Instruction {
         this.Opcode = 0x00; 
         
         // Arguments
+
+        // Stack
     }
 
     public override string Description => "Do nothing.";

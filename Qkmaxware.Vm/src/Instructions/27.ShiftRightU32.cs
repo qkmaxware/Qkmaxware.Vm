@@ -10,6 +10,11 @@ public class RightShiftU32 : Instruction {
         this.Opcode = 0x27; 
         
         // Arguments
+
+        // Stack
+        this.AddStackOperand("lhs");
+        this.AddStackOperand("rhs");
+        this.AddStackReturn("result");
     }
 
     public override string Description => "Right shift the elements of one unsigned integer by another";

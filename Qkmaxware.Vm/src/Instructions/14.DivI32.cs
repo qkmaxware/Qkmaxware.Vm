@@ -10,6 +10,11 @@ public class DivI32 : Instruction {
         this.Opcode = 0x14; 
         
         // Arguments
+    
+        // Stack
+        this.AddStackOperand("lhs");
+        this.AddStackOperand("rhs");
+        this.AddStackReturn("result");
     }
 
     public override string Description => "Arithmetic division between 2 integers at the top of the operand stack";

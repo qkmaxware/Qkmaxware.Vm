@@ -3,13 +3,15 @@ namespace Qkmaxware.Vm.Test;
 [TestClass]
 public class LinearByteArrayMemoryTester {
 
-    private IEnumerable<AllocatedMemoryBlock> enumerateBlocks(IRandomAccessMemory mem) {
+    private IEnumerable<AllocatedMemoryBlock> enumerateBlocks(Memory mem) {
         return new HeapBlockIterator(mem);
     }
 
     [TestMethod]
     public void TestReserve() {
-        var memory = new LinearByteArrayMemory(DataSize.Bytes(128));
+        var bytes = new LinearByteArrayMemory(DataSize.Bytes(128));
+        var memory = new Memory(Mutability.ReadWrite, bytes.Size, bytes.Size, bytes);
+        memory.InitBlock();
         var blocks = enumerateBlocks(memory).ToList();
         Assert.AreEqual(1, blocks.Count);
         Assert.AreEqual(true, blocks[0].IsFree);
@@ -41,7 +43,9 @@ public class LinearByteArrayMemoryTester {
 
     [TestMethod]
     public void TestFree() {
-        var memory = new LinearByteArrayMemory(DataSize.Bytes(128));
+        var bytes = new LinearByteArrayMemory(DataSize.Bytes(128));
+        var memory = new Memory(Mutability.ReadWrite, bytes.Size, bytes.Size, bytes);
+        memory.InitBlock();
         var blocks = enumerateBlocks(memory).ToList();
         Assert.AreEqual(1, blocks.Count);
         Assert.AreEqual(true, blocks[0].IsFree);

@@ -6,19 +6,22 @@ namespace Qkmaxware.Vm;
 public class Machine {
 
     private HostInterface host;
-    private IRandomAccessMemory heap;
 
-    public Machine() : this(HostInterface.Default(), new LinearByteArrayMemory(DataSize.Kibibytes(2))) {}
+    public Machine() : this(HostInterface.Default()) {}
 
-    public Machine(HostInterface host) : this(host, new LinearByteArrayMemory(DataSize.Kibibytes(2))) {}
-
-    public Machine(HostInterface host, IRandomAccessMemory heap) {
+    public Machine(HostInterface host) {
         this.host = host;
-        this.heap = heap;
     }
 
     public ThreadOfExecution LoadProgram(Module module) {
-        return new ThreadOfExecution(module, new RuntimeEnvironment(module, host, heap));
+        return new ThreadOfExecution(
+            module, 
+            new RuntimeEnvironment(
+                module, 
+                host, 
+                module.Memories.Select(spec => spec.Instantiate()).ToList()
+            )
+        );
     }
 
 }

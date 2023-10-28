@@ -9,14 +9,10 @@ public class Operand : VmValue {
     public System.UInt32 UInt32 => value;
     public System.Int32 Int32 => BitConverter.ToInt32(BitConverter.GetBytes(value));
     public System.Single Float32 => BitConverter.ToSingle(BitConverter.GetBytes(value));
-    public Pointer Pointer32 => new Pointer(value);
+    public bool Boolean => value != 0;
 
     private Operand(System.UInt32 value) {
         this.value = value;
-    }
-
-    public static Operand From(Pointer value) {
-        return new Operand(value.UIntValue);
     }
     public static Operand From(System.UInt32 value) {
         return new Operand(value);

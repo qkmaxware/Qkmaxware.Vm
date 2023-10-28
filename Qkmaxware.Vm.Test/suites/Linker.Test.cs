@@ -10,7 +10,7 @@ public class LinkerTester {
         var import = builder.ImportSubprogram("System.Console.PrintString");
         var str = builder.AddConstantUtf8String("Hello World");
 
-        builder.PushConstant(str);
+        builder.PushAddressOf(str);
         builder.CallExternal(import, 1);
         builder.Exit(0);
         
@@ -21,7 +21,7 @@ public class LinkerTester {
         builder.Exit(1);
         var import = builder.ExportSubprogram("System.Console.PrintString");
         builder.PushArgument(0);
-        builder.PrintString();
+        builder.PrintString(0);
         builder.Return();
         
         return builder.ToModule();
@@ -41,7 +41,7 @@ public class LinkerTester {
 
         Assert.AreEqual(1, linked.ExportCount);
         Assert.AreEqual(0, linked.ImportCount);
-        Assert.AreEqual(primary.ConstantPoolCount + lib.ConstantPoolCount, linked.ConstantPoolCount);
+        Assert.AreEqual(primary.MemoryCount + lib.MemoryCount, linked.MemoryCount);
         Assert.AreEqual(primary.CodeLength + lib.CodeLength, linked.CodeLength);
     }
 

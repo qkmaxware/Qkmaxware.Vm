@@ -11,6 +11,8 @@ public class Goto : Instruction {
         
         // Arguments
         this.AddArgument(new Int32Argument("Offset"));
+
+        // Stack
     }
 
     public override string Description => "Jump to another position in the program at PC + Offset.";

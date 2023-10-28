@@ -11,6 +11,13 @@ public class DupBelow : Instruction {
         
         // Arguments
         this.AddArgument(new Int32Argument("Stack Depth"));
+
+        // Stack
+        this.AddStackOperand("value");
+        this.AddStackOperand("...");
+        this.AddStackReturn("value");
+        this.AddStackReturn("...");
+        this.AddStackReturn("value");
     }
 
     public override string Description => "Duplicate a value below the top of the stack given by the depth argument and place the result on the top of the stack.";

@@ -28,6 +28,7 @@ public class Describe : BaseCommand {
         Console.WriteLine($"size: {file.Length} bytes");
         Console.WriteLine($"last modified: {file.LastWriteTime}");
         Console.WriteLine();
+        Console.WriteLine();
 
         Console.WriteLine($"Exports ({module.ExportCount}):");
         foreach (var export in module.Exports) {
@@ -65,32 +66,22 @@ public class Describe : BaseCommand {
         }
 
         Console.WriteLine();
-        Console.WriteLine($"Constant Pool ({module.ConstantPoolCount} values):");
+        Console.WriteLine($"Memories ({module.MemoryCount}):");
         Console.Write("    ");
         Console.Write($"Index".PadRight(6));
         Console.Write(' ');
-        Console.Write("| Type".PadRight(32));
-        Console.WriteLine("| Value");
-        foreach (var cons in module.ConstantPool) {
-            Console.Write("      ");
-            Console.Write($"{cons.PoolIndex}".PadRight(6));
-            Console.Write(' ');
-            Console.Write(cons.GetType().Name.PadRight(32));
-            Console.WriteLine(cons.ValueToString());
-        }
-
-        Console.WriteLine();
-        Console.WriteLine($"Static Pool ({module.StaticPoolCount} values):");
-        Console.Write("    ");
-        Console.Write($"Index".PadRight(6));
-        Console.Write(' ');
-        Console.WriteLine("| Value");
+        Console.WriteLine("| Permissions | Size      | Data");
         var static_index = 0;
-        foreach (var value in module.StaticPool) {
+        foreach (var value in module.Memories) {
             Console.Write("      ");
             Console.Write($"{static_index++}".PadRight(6));
             Console.Write(' ');
-            Console.Write(value.UInt32.ToString("X"));
+            Console.Write(value.Mutability.ToString().PadRight(13));
+            Console.Write(' ');
+            Console.Write(value.Limits.ToString().PadRight(11));
+            Console.Write(' ');
+            Console.Write(System.Text.Encoding.ASCII.GetString(value.Initializer.ToArray()));
+            Console.WriteLine();
         }
     }
 }

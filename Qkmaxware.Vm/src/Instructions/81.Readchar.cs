@@ -10,6 +10,9 @@ public class Readchar : Instruction {
         this.Opcode = 0x81; 
         
         // Arguments
+
+        // Stack
+        this.AddStackReturn("character");
     }
 
     public override string Description => "Read a single character from the input stream and add it to the top of the stack.";

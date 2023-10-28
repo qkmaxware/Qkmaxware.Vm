@@ -10,6 +10,10 @@ public class U32ToI32 : Instruction {
         this.Opcode = 0x42; 
         
         // Arguments
+
+        // Stack
+        this.AddStackOperand("u32");
+        this.AddStackReturn("i32");
     }
 
     public override string Description => "Convert the top of the stack from an 32bit unsigned integer to a 32bit integer.";

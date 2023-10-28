@@ -11,6 +11,9 @@ public class StoreLocal : Instruction {
         
         // Arguments
         this.AddArgument(new Int32Argument("Local Index"));
+
+        // Stack
+        this.AddStackOperand("value");
     }
 
     public override string Description => "Save a value on the top of the stack into a local variable in the current subprogram";

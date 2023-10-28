@@ -11,6 +11,9 @@ public class LoadArg : Instruction {
         
         // Arguments
         this.AddArgument(new Int32Argument("Argument Index"));
+
+        // Stack
+        this.AddStackReturn("argument");
     }
 
     /*

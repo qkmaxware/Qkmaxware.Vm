@@ -3,9 +3,10 @@ use asm 1.0
 @n = 5
 
 .main 
-    load_const @n
+    immediate_i32 @n
+    load8_u 0
     call .factorial 1
-    i32_to_string 
+    i32_to_string 2
     !printstr
     exit 0
 

@@ -10,6 +10,11 @@ public class AddI32 : Instruction {
         this.Opcode = 0x11; 
         
         // Arguments
+
+        // Stack
+        this.AddStackOperand("lhs");
+        this.AddStackOperand("rhs");
+        this.AddStackReturn("result");
     }
 
     public override string Description => "Arithmetic addition between 2 integers at the top of the operand stack";

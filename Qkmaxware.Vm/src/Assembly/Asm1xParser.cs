@@ -30,7 +30,7 @@ public class Asm1xParser : IAssemblyParser {
         using var builder = new ModuleBuilder();
         Dictionary<string, Label> labels = new Dictionary<string, Label>();
         List<LabelThunk> label_thunks = new List<LabelThunk>();
-        Dictionary<string, ConstantRef> constants = new Dictionary<string, ConstantRef>();
+        Dictionary<string, MemoryRef> constants = new Dictionary<string, MemoryRef>();
 
         string? line = null;
         long lineIndex = 0;
@@ -100,7 +100,7 @@ public class Asm1xParser : IAssemblyParser {
     }
 
     private static Regex constantPattern = new Regex(@"^\s*\@(?<id>\w+)\s*=\s*(?<value>.+)");
-    private void handleConstant(ModuleBuilder builder, Dictionary<string, Label> labels, Dictionary<string, ConstantRef> consts, string line) {
+    private void handleConstant(ModuleBuilder builder, Dictionary<string, Label> labels, Dictionary<string, MemoryRef> consts, string line) {
         var match = constantPattern.Match(line);
         if (!match.Success) {
             throw new FormatException("Invalid constant format. Constants should be named using an '@' followed by any number of the following digits [a-zA-Z0-9_] and assigned a value after the '=' sign.");
@@ -117,34 +117,49 @@ public class Asm1xParser : IAssemblyParser {
        var constantRef = builder.AddConstant(constantValue);
        consts[id] = constantRef;
     }
-    private ConstantData readString(string value) {
-        var str = System.Text.Json.JsonSerializer.Deserialize<string>(value);
-        if (str == null)
+    private byte[] readString(string value) {
+        var smatch = stringRegex.Match(value);
+        var str = string.Empty;
+        if (smatch.Success) {
+            str = smatch.Groups["content"]?.Value ?? string.Empty;
+        }
+        if (string.IsNullOrEmpty(str))
             throw new FormatException("Invalid string format");
-        return new StringConstant(ConstantInfo.Utf8, str);
+        var bytes = System.Text.Encoding.UTF8.GetBytes(str);
+        return bytes;
     }
     private static Regex floatPattern = new Regex(@"(\+|\-)?\d+(?:\.\d+f?|f)");
     private static Regex uintPattern = new Regex(@"\d+(u|U)");
     private static Regex intPattern = new Regex(@"(\+|\-)?\d+");
-    private ConstantData readNumber(string value) {
+    private static Regex memoryAnchorPattern = new Regex("\\$\\[a-zA-Z]+");
+    private byte[] readNumber(string value) {
         var fmatch = floatPattern.Match(value);
         if (fmatch.Success) {
-            return new Float32Constant(float.Parse(fmatch.Value.Replace("f", string.Empty)));
+            var bytes = BitConverter.GetBytes(float.Parse(fmatch.Value.Replace("f", string.Empty)));
+            if (!BitConverter.IsLittleEndian)
+                Array.Reverse(bytes);
+            return bytes;
         }
         var umatch = uintPattern.Match(value);
         if (umatch.Success) {
-            return new UInt32Constant(uint.Parse(umatch.Value.Replace("u", string.Empty).Replace("U", string.Empty)));
+            var bytes = BitConverter.GetBytes(uint.Parse(umatch.Value.Replace("u", string.Empty).Replace("U", string.Empty)));
+            if (!BitConverter.IsLittleEndian)
+                Array.Reverse(bytes);
+            return bytes;
         }
         var imatch = intPattern.Match(value);
         if (imatch.Success) {
-            return new Int32Constant(int.Parse(imatch.Value));
+            var bytes = BitConverter.GetBytes(int.Parse(imatch.Value));
+            if (!BitConverter.IsLittleEndian)
+                Array.Reverse(bytes);
+            return bytes;
         }
 
         throw new FormatException("Invalid numeric format");
     }
 
     private static Regex labelPattern = new Regex(@"^\s*\.(?<id>\w+)\s*$");
-    private void handleLabel(ModuleBuilder builder, Dictionary<string, Label> labels, List<LabelThunk> label_thunks, Dictionary<string, ConstantRef> consts, string line) {
+    private void handleLabel(ModuleBuilder builder, Dictionary<string, Label> labels, List<LabelThunk> label_thunks, Dictionary<string, MemoryRef> consts, string line) {
         var match = labelPattern.Match(line);
         if (!match.Success) {
             throw new FormatException("Invalid label format. Labels should be a '.' followed by any number of the following digits [a-zA-Z0-9_].");
@@ -158,7 +173,7 @@ public class Asm1xParser : IAssemblyParser {
     }
 
     private static Regex macroPattern = new Regex(@"^\s*\!(?<id>\w+)\s*(?<args>.*)");
-    private void handleMacro(ModuleBuilder builder, Dictionary<string, Label> labels, Dictionary<string, ConstantRef> consts, string line) { 
+    private void handleMacro(ModuleBuilder builder, Dictionary<string, Label> labels, Dictionary<string, MemoryRef> consts, string line) { 
         var match = macroPattern.Match(line);
         if (!match.Success) {
             throw new FormatException("Invalid macro format. Macro names should be a '!' followed by any number of the following digits [a-zA-Z0-9_].");
@@ -183,8 +198,8 @@ public class Asm1xParser : IAssemblyParser {
 
     private static Regex labelNameRegex = new Regex(@"^\.(?<id>\w+)");
     private static Regex constantNameRegex = new Regex(@"^\@(?<id>\w+)");
-    private static Regex stringRegex = new Regex(@"^((?<![\\])[""])((?:.(?!(?<![\\])\1))*.?)\1");
-    private object[] readMacroArgs(Dictionary<string, Label> labels, Dictionary<string, ConstantRef> consts, string argList) {
+    private static Regex stringRegex = new Regex(@"^((?<![\\])[""])(?<content>(?:.(?!(?<![\\])\1))*.?)\1");
+    private object[] readMacroArgs(Dictionary<string, Label> labels, Dictionary<string, MemoryRef> consts, string argList) {
         if (string.IsNullOrEmpty(argList))
             return new object[0];
 
@@ -211,7 +226,7 @@ public class Asm1xParser : IAssemblyParser {
             
             var smatch = stringRegex.Match(arg);
             if (smatch.Success) {
-                parsed[i] = System.Text.Json.JsonSerializer.Deserialize<string>(smatch.Value) ?? string.Empty;
+                parsed[i] = smatch.Groups["content"]?.Value ?? string.Empty;
                 continue;
             }
 
@@ -223,22 +238,23 @@ public class Asm1xParser : IAssemblyParser {
                 parsed[i] = labels[constId].CodePosition;
                 continue;
             }
+            
             var cmatch = constantNameRegex.Match(arg);
-            if (lmatch.Success) {
+            if (cmatch.Success) {
                 var constId = cmatch.Groups["id"].Value;
                 if (!consts.ContainsKey(constId))
                     throw new MissingMemberException($"No constant defined with name '{constId}'.");
-                parsed[i] = consts[constId].PoolIndex;
+                parsed[i] = consts[constId];
                 continue;
             }
 
-            throw new FormatException("Unknown argument type");
+            throw new FormatException($"Unknown argument type '{arg}'.");
         }
         return parsed;
     }
 
     private static Regex instrPattern = new Regex(@"^\s*(?<id>\w+)\s*(?<args>.*)");
-    private void handleInstruction(ModuleBuilder builder, Dictionary<string, Label> labels, List<LabelThunk> label_thunks, Dictionary<string, ConstantRef> consts, string line) { 
+    private void handleInstruction(ModuleBuilder builder, Dictionary<string, Label> labels, List<LabelThunk> label_thunks, Dictionary<string, MemoryRef> consts, string line) { 
         var match = instrPattern.Match(line);
         if (!match.Success) {
             throw new FormatException("Invalid instruction format. Instruction names should be any number of the following digits [a-zA-Z0-9_]. Arguments should follow instruction names separated by spaces.");
@@ -268,7 +284,7 @@ public class Asm1xParser : IAssemblyParser {
         }
     }
 
-    private VmValue[] readInitialInstrArgs(Dictionary<string, Label> labels, Dictionary<string, ConstantRef> consts, string argList, out List<string> requires_thunk) {
+    private VmValue[] readInitialInstrArgs(Dictionary<string, Label> labels, Dictionary<string, MemoryRef> consts, string argList, out List<string> requires_thunk) {
         requires_thunk = new List<string>();
         if (string.IsNullOrEmpty(argList))
             return new VmValue[0];
@@ -277,6 +293,12 @@ public class Asm1xParser : IAssemblyParser {
         var parsed = new VmValue[args.Length];
         for (var i = 0; i < args.Length; i++) {
             var arg = args[i];
+
+            var memoryMatch = memoryAnchorPattern.Match(arg);
+            if (memoryMatch.Success) {
+                parsed[i] = Operand.From(0);
+                continue;
+            }
 
             var fmatch = floatPattern.Match(arg);
             if (fmatch.Success) {
@@ -319,7 +341,7 @@ public class Asm1xParser : IAssemblyParser {
         }
         return parsed;
     }
-    private VmValue[] readFinalInstrArgs(long positionAfterInstruction, ModuleBuilder builder, Dictionary<string, Label> labels, Dictionary<string, ConstantRef> consts, string argList) {
+    private VmValue[] readFinalInstrArgs(long positionAfterInstruction, ModuleBuilder builder, Dictionary<string, Label> labels, Dictionary<string, MemoryRef> consts, string argList) {
         if (string.IsNullOrEmpty(argList))
             return new VmValue[0];
 
@@ -327,6 +349,18 @@ public class Asm1xParser : IAssemblyParser {
         var parsed = new VmValue[args.Length];
         for (var i = 0; i < args.Length; i++) {
             var arg = args[i];
+
+            var memoryMatch = memoryAnchorPattern.Match(arg);
+            if (memoryMatch.Success) {
+                var anchor = memoryMatch.Value.Substring(1);
+                var index = anchor switch {
+                    "const" => builder.ConstantPoolIndex,
+                    "static" => builder.StaticPoolIndex,
+                    _ => 0
+                };
+                parsed[i] =  Operand.From(index);
+                continue;
+            }
 
             var fmatch = floatPattern.Match(arg);
             if (fmatch.Success) {
@@ -346,7 +380,7 @@ public class Asm1xParser : IAssemblyParser {
 
             var smatch = stringRegex.Match(arg);
             if (smatch.Success) {
-                var name = System.Text.Json.JsonSerializer.Deserialize<string>(smatch.Value);
+                var name = smatch.Groups["content"]?.Value ?? string.Empty;
                 int index;
                 if (builder.HasImportedSubprogram(name, out index)) {
                     parsed[i] = Operand.From(index);
@@ -370,7 +404,7 @@ public class Asm1xParser : IAssemblyParser {
                 var constId = cmatch.Groups["id"].Value;
                 if (!consts.ContainsKey(constId))
                     throw new MissingMemberException($"No constant defined with name '{constId}'.");
-                parsed[i] = Operand.From(consts[constId].PoolIndex);
+                parsed[i] = Operand.From(consts[constId].Offset);
                 continue;
             }
 

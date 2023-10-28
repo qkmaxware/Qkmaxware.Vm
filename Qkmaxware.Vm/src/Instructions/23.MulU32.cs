@@ -10,6 +10,11 @@ public class MulU32 : Instruction {
         this.Opcode = 0x23; 
         
         // Arguments
+
+        // Stack
+        this.AddStackOperand("lhs");
+        this.AddStackOperand("rhs");
+        this.AddStackReturn("result");
     }
 
     public override string Description => "Arithmetic multiplication between 2 unsigned integers at the top of the operand stack";

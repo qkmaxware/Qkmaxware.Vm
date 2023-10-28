@@ -10,6 +10,10 @@ public class U32ToF32 : Instruction {
         this.Opcode = 0x43; 
         
         // Arguments
+
+        // Stack
+        this.AddStackOperand("u32");
+        this.AddStackReturn("f32");
     }
 
     public override string Description => "Convert the top of the stack from an 32bit unsigned integer to a 32bit floating point value.";

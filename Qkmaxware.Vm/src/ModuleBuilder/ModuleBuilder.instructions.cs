@@ -35,11 +35,8 @@ public partial class ModuleBuilder {
         this.AddInstruction("pop_n", Operand.From(elements));
     }
 
-    public void PushConstant(int constantPoolIndex) {
-        this.AddInstruction("load_const", Operand.From(constantPoolIndex));
-    }
-    public void PushConstant(ConstantRef constant) {
-        this.AddInstruction("load_const", Operand.From(constant.PoolIndex));
+    public void PushAddressOf(MemoryRef element) {
+        this.AddInstruction("immediate_i32", Operand.From(element.Offset));
     }
 
     public void PushLocal(int localIndex) {
@@ -106,29 +103,7 @@ public partial class ModuleBuilder {
     public void SetNotEqualThanUInt32() => this.AddInstruction("set_neq_u32");
     public void SetNotEqualThanFloat32() => this.AddInstruction("set_neq_f32");
 
-    public void ObjectSize() => this.AddInstruction("sizeof");
-    public void ArrayLength() => this.AddInstruction("len");
-    public void SetArrayElement() {
-        this.AddInstruction("set_element");
-    }
-    public void SetArrayElement(int index, int value) {
-        this.PushInt32(index);
-        this.PushInt32(value);
-        this.AddInstruction("set_element");
-    }
-    public void GetArrayElement() {
-        this.AddInstruction("get_element");
-    }
-    public void GetArrayElement(int index) {
-        this.PushInt32(index);
-        this.AddInstruction("get_element");
-    }
-    public void GetArrayElement(ConstantRef @ref, int index) {
-        this.PushConstant(@ref);
-        this.PushInt32(index);
-        this.AddInstruction("get_element");
-    }
-
+    public void ObjectSize(int fromMemory) => this.AddInstruction("sizeof", Operand.From(fromMemory));
 
     public void Goto(long anchor) {
         this.AddInstruction(
@@ -195,6 +170,32 @@ public partial class ModuleBuilder {
 
     public void PrintChar() => this.AddInstruction("putchar");
     public void ReadChar() => this.AddInstruction("readchar");
+
+    public void Load8(int fromMemory, Extend extend) {
+        switch (extend) {
+            case Extend.Zero:
+                this.AddInstruction("load8_u", Operand.From(fromMemory));
+                break;
+            case Extend.Sign:
+                this.AddInstruction("load8_s", Operand.From(fromMemory));
+                break;
+        }
+    }
+
+    public void Load16(int fromMemory, Extend extend) {
+        switch (extend) {
+            case Extend.Zero:
+                this.AddInstruction("load16_u", Operand.From(fromMemory));
+                break;
+            case Extend.Sign:
+                this.AddInstruction("load16_s", Operand.From(fromMemory));
+                break;
+        }
+    }
+
+    public void Load32(int fromMemory) {
+        this.AddInstruction("load32", Operand.From(fromMemory));
+    }
 
     public void Allocate() => this.AddInstruction("alloc");
     public void Allocate(int bytes) {

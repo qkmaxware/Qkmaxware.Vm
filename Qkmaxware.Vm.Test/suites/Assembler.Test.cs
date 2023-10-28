@@ -10,8 +10,8 @@ public string Program1 = @"use asm 1.0
 @hello = ""Hello World""
 
 .main
-    load_const @hello
-    !printstr
+    immediate_i32 @hello
+    !printstr 0
 ";
 
     [TestMethod]
@@ -43,11 +43,11 @@ public string Program2 = @"use asm 1.0
 @r = 12f
 
 .main   
-    load_const @pi
+    !load_const32 @pi
 
     // Compute r^2
-    load_const @r
-    load_const @r
+    !load_const32 @r
+    !load_const32 @r
     mul_f32
 
     // Compute pi * r^2
@@ -85,7 +85,7 @@ import ""System.Console.PrintString""
 
 export ""Main""
 .main
-    load_const @hello
+    immediate_i32 @hello
     call_external ""System.Console.PrintString"" 1
     exit 0";
 var lib = @"use asm 1.0
@@ -93,7 +93,7 @@ var lib = @"use asm 1.0
 exit 1 // We should never get here, if we do something is wrong
 export ""System.Console.PrintString""
     load_arg 0
-    !printstr
+    !printstr 0
     return_procedure";
 
         var assembler = new Assembly.Assembler();

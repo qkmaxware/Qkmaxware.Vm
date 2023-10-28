@@ -10,6 +10,11 @@ public class LeftShiftU32 : Instruction {
         this.Opcode = 0x26; 
         
         // Arguments
+
+        // Stack
+        this.AddStackOperand("lhs");
+        this.AddStackOperand("rhs");
+        this.AddStackReturn("result");
     }
 
     public override string Description => "Left shift the elements of one unsigned integer by another";
