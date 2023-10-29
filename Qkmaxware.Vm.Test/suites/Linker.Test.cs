@@ -21,7 +21,7 @@ public class LinkerTester {
         builder.Exit(1);
         var import = builder.ExportSubprogram("System.Console.PrintString");
         builder.PushArgument(0);
-        builder.PrintString(0);
+        builder.PrintStringOnStack(-2); // Linker will change this index
         builder.Return();
         
         return builder.ToModule();
@@ -59,11 +59,12 @@ public class LinkerTester {
         );
         var vm = new Machine(host);
         var thread = vm.LoadProgram(linked);
-        thread.RunUntilComplete();
 
         using (var writer = new BinaryWriter(File.OpenWrite("LinkerTester.TestExternalCall.qkbc"))) {
             linked.EncodeFile(writer);
         }
+
+        thread.RunUntilComplete();
         foreach (var instr in new Disassembler().DisassembleCode(linked)) {
             Console.WriteLine(instr);
         }

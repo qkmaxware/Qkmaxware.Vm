@@ -81,7 +81,7 @@ public class ModuleBuilderTester {
         var ptr = builder.AddConstantUtf8String(str);
 
         builder.PushAddressOf(ptr);
-        builder.PrintString(0);
+        builder.PrintStringOnStack(0);
 
         var module = builder.ToModule();
         using (var writer = new BinaryWriter(File.OpenWrite("ModuleBuilderTester.TestHelloWorldMacro.qkbc"))) {

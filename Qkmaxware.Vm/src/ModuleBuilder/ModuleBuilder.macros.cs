@@ -18,8 +18,13 @@ public partial class ModuleBuilder {
     /// <summary>
     /// Insert all instructions required to print a string from the top of the stack
     /// </summary>
-    [Macro("printstr", description: "Insert all instructions required to print a string from the top of the stack.")]
-    public void PrintString(int fromMemory) {
+    [Macro("printstr", description: "Insert all instructions required to print a string from memory.")]
+    public void PrintString(MemoryRef constant) {
+        PushInt32(constant.Offset);
+        PrintStringOnStack(constant.MemoryIndex);
+    }
+    [Macro("printstr_onstack", description: "Insert all instructions required to print a string from the top of the stack.")]
+    public void PrintStringOnStack(int memoryIndex) {
         // High level version of what we are attempting to do in bytecode assembly
         /*
             var string = "";
@@ -34,7 +39,7 @@ public partial class ModuleBuilder {
         // Stack [string_ptr]
         this.DuplicateStackTop();
         // Stack [string_ptr, string_ptr]
-        this.ObjectSize(fromMemory); 
+        this.ObjectSize(memoryIndex); 
         // Stack [string_ptr, string_length]
         this.PushInt32(0);
         // Stack [string_ptr, string_length, index]
@@ -43,7 +48,7 @@ public partial class ModuleBuilder {
         // Stack [string_ptr, string_length, index, string_ptr]
         this.DuplicateStackElement(1);
         // Stack [string_ptr, string_length, index, string_ptr, index]
-        this.Load8(fromMemory, Extend.Zero);
+        this.Load8(memoryIndex, Extend.Zero);
         // Stack [string_ptr, string_length, index, character]
         this.AddInstruction("putchar");
         // Stack [string_ptr, string_length, index]

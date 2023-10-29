@@ -10,8 +10,7 @@ public string Program1 = @"use asm 1.0
 @hello = ""Hello World""
 
 .main
-    immediate_i32 @hello
-    !printstr 0
+    !printstr @hello
 ";
 
     [TestMethod]
@@ -93,7 +92,7 @@ var lib = @"use asm 1.0
 exit 1 // We should never get here, if we do something is wrong
 export ""System.Console.PrintString""
     load_arg 0
-    !printstr 0
+    !printstr_onstack -2
     return_procedure";
 
         var assembler = new Assembly.Assembler();
