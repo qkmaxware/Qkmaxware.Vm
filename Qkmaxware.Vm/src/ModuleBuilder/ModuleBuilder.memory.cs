@@ -43,7 +43,7 @@ public partial class ModuleBuilder {
         var offset = this._additionalMems.Count;
         this._additionalMems.Add(new MemorySpec(mutability: mutability, limits: limits, initializer: null));
 
-        return offset;
+        return this.AdditionalMemoryOffsetIndex + offset;
     }
 
     /// <summary>

@@ -14,14 +14,30 @@
 
 export "Main"
 .main
-    load_const @@hello
-    !printstr
+    !printstr @@hello
     exit 0
     </textarea>
-</div>
-
-<div id="attribution">
-    Powered by <a href="https://codemirror.net/" target="_blank"><img src="https://codemirror.net/style/logo.svg" style="width: 1em">Code Mirror</a>
+    <div id="terminal">
+        <div class="bar">
+            <button class='w3-button @(this.CurrentTerminal == TerminalTabs.Stdin ? "active" : "inactive")' @onclick=@(() => this.CurrentTerminal = TerminalTabs.Stdin)>Standard In</button>
+            <button class='w3-button @(this.CurrentTerminal == TerminalTabs.Stdout ? "active" : "inactive")' @onclick=@(() => this.CurrentTerminal = TerminalTabs.Stdout)>Standard Out</button>
+        </div>
+        <div class="w3-padding">
+            @switch (this.CurrentTerminal){
+                case TerminalTabs.Stdin:
+                    <textarea @bind=stdinText></textarea>
+                    break;
+                case TerminalTabs.Stdout:
+                    <textarea readonly>@stdoutText</textarea>
+                    break;
+                default:
+                    break;
+            }
+        </div>
+        <div id="attribution">
+            Powered by <a href="https://codemirror.net/" target="_blank"><img src="https://codemirror.net/style/logo.svg" style="width: 1em">Code Mirror</a>
+        </div>
+    </div>
 </div>
 
 <div id="actions">
@@ -30,7 +46,7 @@ export "Main"
         <button @onclick=beginLoad title="Load code"><i class="fa fa-folder-open"></i></button>
         <button @onclick=help title="Show help window"><i class="fa fa-info-circle"></i></button>
         <button @onclick=download title="Download bytecode"><i class="fa fa-download"></i></button>
-        <button @onclick=stdin title="Settings"><i class="fa  fa-gears"></i></button>
+        <!--<button @onclick=stdin title="Settings"><i class="fa  fa-gears"></i></button>-->
         <button @onclick=buildAndRun title="Run"><i class="fa fa-play"></i></button>
     </div>
     <div>
@@ -55,8 +71,6 @@ export "Main"
             <button style="float: right;" @onclick=closeStdin>&times;</button>
         </header>
         <div style="text-align: center">
-            <h3>Standard Input Text</h3>
-            <textarea @bind=stdinText></textarea>
         </div>
         <footer></footer>
     </div>
@@ -110,7 +124,7 @@ export "Main"
                 <button style="font-size: medium; display: block; width: 100%;" @onclick=helpIS>Instruction Set</button>
                 <button style="font-size: medium; display: block; width: 100%;" @onclick=helpMacro>Macro Listing</button>
             </nav>
-            <article><tt>@helpContent</tt></article>
+            <article style="max-height: 50vh; overflow-y: auto;"><tt>@helpContent</tt></article>
         </div>
         <footer></footer>
     </div>
@@ -124,6 +138,11 @@ export "Main"
 
     private bool showHelp;
     private string? helpContent;
+
+    enum TerminalTabs {
+        Stdin, Stdout
+    }
+    private TerminalTabs CurrentTerminal = TerminalTabs.Stdin;
 
     protected override void OnAfterRender(bool first) {
         if (first) {
@@ -155,32 +174,34 @@ export "Main"
 
 export ""Main""
 .main
-    load_const @hello
-    !printstr
+    !printstr @hello
     exit 0"},
         {"Printing Numbers", @"use asm 1.0
+
+memory $heap 12MB
 
 @pi = 3.14f
 
 export ""Main""
 .main
-    load_const @pi
-    f32_to_string 
+    !load_const32 @pi
+    f32_to_string $heap
     dup
-    !printstr
-    free
+    !printstr_onstack $heap
+    free $heap
     exit 0"},
         {"Factorial", @"use asm 1.0
+memory $heap 12MB
 
 @n = 5
 
 .main 
-    load_const @n
+    !load_const32 @n
     call .factorial 1
-    i32_to_string 
+    i32_to_string $heap
     dup
-    !printstr
-    free
+    !printstr_onstack $heap
+    free $heap
     exit 0
 
 export ""Factorial(int)""
@@ -356,6 +377,7 @@ export ""Main""
 
     private bool showStdin;
     private string? stdinText = "Foo Bar Baz";
+    private string? stdoutText = "";
     public void stdin() {
         showStdin = true;
     }
@@ -365,11 +387,14 @@ export ""Main""
 
     private async Task buildAndRun() {
         try {
+            this.CurrentTerminal = TerminalTabs.Stdout;
             var program = await js.InvokeAsync<string>("editorValue");
 
             var asm = new Assembler();
             using var reader = new StringReader(program);
             
+            stdoutText = "> Assembling " + DateTime.Now.ToLongTimeString() + System.Environment.NewLine;
+            await InvokeAsync(StateHasChanged);
             var module = asm.FromStream(reader);
 
             var sb = new StringBuilder();
@@ -380,13 +405,15 @@ export ""Main""
             var vm = new Machine(host);
             var thread = vm.LoadProgram(module);
 
-            notifications.Add(new Notification(NotificationLevel.Info, "Beginning program"));
+            stdoutText += "> Beginning Execution " + DateTime.Now.ToLongTimeString() + System.Environment.NewLine + System.Environment.NewLine;
             await InvokeAsync(StateHasChanged);
             thread.RunUntilComplete();
 
-            notifications.Add(new Notification(NotificationLevel.Success, sb.ToString()));
+            stdoutText += sb.ToString();
+            await InvokeAsync(StateHasChanged);
         } catch (Exception e) {
             notifications.Add(new Notification(NotificationLevel.Error, e.Message));
+            stdoutText += e.StackTrace;
         }
     }
 }

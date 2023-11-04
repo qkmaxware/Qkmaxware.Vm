@@ -16,7 +16,7 @@ public class U32ToString : Instruction {
     public override string Description => "Convert the top of the stack from an 32bit unsigned integer into a string on the heap. Requires cleanup after use.";
 
     public override void Action(VmValue[] args, RuntimeEnvironment runtime) {
-        var value = runtime.Stack.PopTop().Int32.ToString();
+        var value = runtime.Stack.PopTop().UInt32.ToString();
         var bytes = 4 * value.Length;
         var memIdx = ((Operand)args[0]).Int32;
 

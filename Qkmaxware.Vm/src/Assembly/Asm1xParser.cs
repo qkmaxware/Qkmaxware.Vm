@@ -29,6 +29,7 @@ public class Asm1xParser : IAssemblyParser {
     public Module Parse(TextReader reader) {
         using var builder = new ModuleBuilder();
         Dictionary<string, Label> labels = new Dictionary<string, Label>();
+        Dictionary<string, int> memories = new Dictionary<string, int>();
         List<LabelThunk> label_thunks = new List<LabelThunk>();
         Dictionary<string, MemoryRef> constants = new Dictionary<string, MemoryRef>();
 
@@ -49,16 +50,19 @@ public class Asm1xParser : IAssemblyParser {
                     handleExport(builder, line);
                 }
                 else if (line.StartsWith('@')) {
-                    handleConstant(builder, labels, constants, line);
+                    handleConstant(builder, memories, labels, constants, line);
                 }
                 else if (line.StartsWith('.')) {
-                    handleLabel(builder, labels, label_thunks, constants, line);
+                    handleLabel(builder, memories, labels, label_thunks, constants, line);
                 }
                 else if (line.StartsWith("!")) {
-                    handleMacro(builder, labels, constants, line);
+                    handleMacro(builder, memories, labels, constants, line);
+                }
+                else if (line.StartsWith("memory")) {
+                    handleMemory(builder, memories, labels, constants, line);
                 }
                 else {
-                    handleInstruction(builder, labels, label_thunks, constants, line);
+                    handleInstruction(builder, memories, labels, label_thunks, constants, line);
                 }
 
                 // Increment line index
@@ -99,8 +103,28 @@ public class Asm1xParser : IAssemblyParser {
         builder.ExportSubprogram(value);
     }
 
+    private static Regex memoryPattern = new Regex(@"^\s*memory\s+\$(?<name>\w+)\s+(?<size>\d+\w+)");
+    private void handleMemory(ModuleBuilder builder, Dictionary<string, int> memories, Dictionary<string, Label> labels,  Dictionary<string, MemoryRef> consts, string line) {
+        var match = memoryPattern.Match(line);
+        if (!match.Success) {
+            throw new FormatException("Invalid memory format, provide a memory id and a default size.");
+        }
+        var name = (match.Groups["name"].Value);
+        if (name == null)  
+            throw new FormatException("Missing or invalid memory identifier");
+        var size = (match.Groups["size"].Value);
+        if (size == null)  
+            throw new FormatException("Missing or invalid memory size string");
+        DataSize? dataSize;
+        if(!DataSize.TryParse(size, null, out dataSize)) {
+            throw new FormatException($"Invalid memory size '{size}'");
+        }
+        var memIdx = builder.MakeMemory(new Limits(dataSize), Mutability.ReadWrite);
+        memories[name] = memIdx;
+    }
+
     private static Regex constantPattern = new Regex(@"^\s*\@(?<id>\w+)\s*=\s*(?<value>.+)");
-    private void handleConstant(ModuleBuilder builder, Dictionary<string, Label> labels, Dictionary<string, MemoryRef> consts, string line) {
+    private void handleConstant(ModuleBuilder builder, Dictionary<string, int> memories, Dictionary<string, Label> labels,  Dictionary<string, MemoryRef> consts, string line) {
         var match = constantPattern.Match(line);
         if (!match.Success) {
             throw new FormatException("Invalid constant format. Constants should be named using an '@' followed by any number of the following digits [a-zA-Z0-9_] and assigned a value after the '=' sign.");
@@ -131,6 +155,7 @@ public class Asm1xParser : IAssemblyParser {
     private static Regex floatPattern = new Regex(@"(\+|\-)?\d+(?:\.\d+f?|f)");
     private static Regex uintPattern = new Regex(@"\d+(u|U)");
     private static Regex intPattern = new Regex(@"(\+|\-)?\d+");
+    private static Regex memPattern = new Regex(@"\$\w+");
     private static Regex memoryAnchorPattern = new Regex("\\$\\[a-zA-Z]+");
     private byte[] readNumber(string value) {
         var fmatch = floatPattern.Match(value);
@@ -159,7 +184,7 @@ public class Asm1xParser : IAssemblyParser {
     }
 
     private static Regex labelPattern = new Regex(@"^\s*\.(?<id>\w+)\s*$");
-    private void handleLabel(ModuleBuilder builder, Dictionary<string, Label> labels, List<LabelThunk> label_thunks, Dictionary<string, MemoryRef> consts, string line) {
+    private void handleLabel(ModuleBuilder builder, Dictionary<string, int> memories, Dictionary<string, Label> labels,  List<LabelThunk> label_thunks, Dictionary<string, MemoryRef> consts, string line) {
         var match = labelPattern.Match(line);
         if (!match.Success) {
             throw new FormatException("Invalid label format. Labels should be a '.' followed by any number of the following digits [a-zA-Z0-9_].");
@@ -173,7 +198,7 @@ public class Asm1xParser : IAssemblyParser {
     }
 
     private static Regex macroPattern = new Regex(@"^\s*\!(?<id>\w+)\s*(?<args>.*)");
-    private void handleMacro(ModuleBuilder builder, Dictionary<string, Label> labels, Dictionary<string, MemoryRef> consts, string line) { 
+    private void handleMacro(ModuleBuilder builder, Dictionary<string, int> memories, Dictionary<string, Label> labels,  Dictionary<string, MemoryRef> consts, string line) { 
         var match = macroPattern.Match(line);
         if (!match.Success) {
             throw new FormatException("Invalid macro format. Macro names should be a '!' followed by any number of the following digits [a-zA-Z0-9_].");
@@ -190,7 +215,7 @@ public class Asm1xParser : IAssemblyParser {
             throw new MissingMethodException($"Macro '{id}' is not defined.");
         
         // Parse arguments
-        object[] argValues = readMacroArgs(labels, consts, args);
+        object[] argValues = readMacroArgs(memories, labels, consts, args);
 
         // Invoke
         macro.Invoke(builder, argValues);
@@ -199,7 +224,7 @@ public class Asm1xParser : IAssemblyParser {
     private static Regex labelNameRegex = new Regex(@"^\.(?<id>\w+)");
     private static Regex constantNameRegex = new Regex(@"^\@(?<id>\w+)");
     private static Regex stringRegex = new Regex(@"^((?<![\\])[""])(?<content>(?:.(?!(?<![\\])\1))*.?)\1");
-    private object[] readMacroArgs(Dictionary<string, Label> labels, Dictionary<string, MemoryRef> consts, string argList) {
+    private object[] readMacroArgs(Dictionary<string, int> memories, Dictionary<string, Label> labels,  Dictionary<string, MemoryRef> consts, string argList) {
         if (string.IsNullOrEmpty(argList))
             return new object[0];
 
@@ -221,6 +246,16 @@ public class Asm1xParser : IAssemblyParser {
             var imatch = intPattern.Match(arg);
             if (imatch.Success) {
                 parsed[i] = (int.Parse(imatch.Value));
+                continue;
+            }
+
+            var mmatch = memPattern.Match(arg);
+            if (mmatch.Success) {
+                var memId = mmatch.Value.Substring(1);
+                if (!memories.ContainsKey(memId)) {
+                    throw new MissingMemberException($"No memory with id '{memId}' defined.");
+                }
+                parsed[i] = memories[memId];
                 continue;
             }
             
@@ -254,7 +289,7 @@ public class Asm1xParser : IAssemblyParser {
     }
 
     private static Regex instrPattern = new Regex(@"^\s*(?<id>\w+)\s*(?<args>.*)");
-    private void handleInstruction(ModuleBuilder builder, Dictionary<string, Label> labels, List<LabelThunk> label_thunks, Dictionary<string, MemoryRef> consts, string line) { 
+    private void handleInstruction(ModuleBuilder builder, Dictionary<string, int> memories, Dictionary<string, Label> labels,  List<LabelThunk> label_thunks, Dictionary<string, MemoryRef> consts, string line) { 
         var match = instrPattern.Match(line);
         if (!match.Success) {
             throw new FormatException("Invalid instruction format. Instruction names should be any number of the following digits [a-zA-Z0-9_]. Arguments should follow instruction names separated by spaces.");
@@ -263,7 +298,7 @@ public class Asm1xParser : IAssemblyParser {
         var args = match.Groups["args"].Value.Trim();
 
         List<string> labels_requiring_thunk;
-        var values = readInitialInstrArgs(labels, consts, args, out labels_requiring_thunk);
+        var values = readInitialInstrArgs(memories, labels, consts, args, out labels_requiring_thunk);
 
         var before = builder.Anchor();
         builder.AddInstruction(id, values); // Push empty values
@@ -273,18 +308,18 @@ public class Asm1xParser : IAssemblyParser {
             label_thunks.Add(new LabelThunk(labels_requiring_thunk, (labels) => {
                 var now = builder.Anchor();
                 builder.RewindStream(before);
-                values = readFinalInstrArgs(after, builder, labels, consts, args);
+                values = readFinalInstrArgs(after, builder, memories, labels, consts, args);
                 builder.AddInstruction(id, values); // Push actual values
                 builder.RewindStream(now);
             }));
         } else {
             builder.RewindStream(before);
-            values = readFinalInstrArgs(after, builder, labels, consts, args);
+            values = readFinalInstrArgs(after, builder, memories, labels, consts, args);
             builder.AddInstruction(id, values); // Push actual values
         }
     }
 
-    private VmValue[] readInitialInstrArgs(Dictionary<string, Label> labels, Dictionary<string, MemoryRef> consts, string argList, out List<string> requires_thunk) {
+    private VmValue[] readInitialInstrArgs(Dictionary<string, int> memories, Dictionary<string, Label> labels,  Dictionary<string, MemoryRef> consts, string argList, out List<string> requires_thunk) {
         requires_thunk = new List<string>();
         if (string.IsNullOrEmpty(argList))
             return new VmValue[0];
@@ -315,6 +350,11 @@ public class Asm1xParser : IAssemblyParser {
                 parsed[i] = Operand.From(0);
                 continue;
             }
+            var mmatch = memPattern.Match(arg);
+            if (mmatch.Success) {
+                parsed[i] = Operand.From(0);
+                continue;
+            }
 
             var smatch = stringRegex.Match(arg);
             if (smatch.Success) {
@@ -341,7 +381,7 @@ public class Asm1xParser : IAssemblyParser {
         }
         return parsed;
     }
-    private VmValue[] readFinalInstrArgs(long positionAfterInstruction, ModuleBuilder builder, Dictionary<string, Label> labels, Dictionary<string, MemoryRef> consts, string argList) {
+    private VmValue[] readFinalInstrArgs(long positionAfterInstruction, ModuleBuilder builder, Dictionary<string, int> memories, Dictionary<string, Label> labels,  Dictionary<string, MemoryRef> consts, string argList) {
         if (string.IsNullOrEmpty(argList))
             return new VmValue[0];
 
@@ -375,6 +415,15 @@ public class Asm1xParser : IAssemblyParser {
             var imatch = intPattern.Match(arg);
             if (imatch.Success) {
                 parsed[i] = Operand.From(int.Parse(imatch.Value));
+                continue;
+            }
+            var mmatch = memPattern.Match(arg);
+            if (mmatch.Success) {
+                var memId = mmatch.Value.Substring(1);
+                if (!memories.ContainsKey(memId)) {
+                    throw new MissingMemberException($"No memory with id '{memId}' defined.");
+                }
+                parsed[i] = Operand.From(memories[memId]);
                 continue;
             }
 

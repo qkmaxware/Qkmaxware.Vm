@@ -23,7 +23,7 @@
 		"keywords": {
 			"patterns": [{
 				"name": "keyword.qkasm",
-				"match": "\\b(use|export|import)\\b"
+				"match": "\\b(use|export|import|memory)\\b"
 			}]
 		},
 		"values": {
@@ -34,6 +34,10 @@
 			{
 				"name": "variable.parameter.qkasm",
 				"match": "\\@\\w+"
+			},
+			{
+				"name": "variable.parameter.qkasm",
+				"match": "\\$\\w+"
 			},
 			{
 				"name": "keyword.qkasm.label",

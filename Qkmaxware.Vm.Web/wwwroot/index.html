@@ -37,12 +37,13 @@
                 "qkasm",
                 {
                     start: [
-                        { regex: /(use|import|export)/, token: "keyword" },
+                        { regex: /(use|import|export|memory)/, token: "keyword" },
                         { regex: /(\.\w+)/, token: "keyword" },
                         { regex: /@[a-zA-Z$_]*/, token: "variable" },
-                        { regex: /![a-zA-Z$_]*/, token: "string" },
+                        { regex: /![a-zA-Z0-9$_]*/, token: "string" },
+                        { regex: /\$[a-zA-Z0-9$_]*/, token: "variable" },
                         { regex: /^\s*[a-zA-Z][a-zA-Z0-9$_]*/, token: "identifier" },
-                        { regex: /0x[a-f\d]+|[-+]?(?:\.\d+|\d+\.?\d*)(?:e[-+]?\d+)?(u|f)?/i, token: "number" },
+                        { regex: /0x[a-f\d]+|[-+]?(?:\.\d+|\d+\.?\d*)(?:e[-+]?\d+)?(u|f)?\b/i, token: "number" },
                         { regex: /\/\/.*/, token: "comment" },
                         { regex: /"(?:[^\\]|\\.)*?(?:"|$)/, token: "string" },
                     ],
