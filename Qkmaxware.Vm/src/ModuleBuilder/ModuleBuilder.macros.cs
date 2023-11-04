@@ -16,13 +16,34 @@ public partial class ModuleBuilder {
     }
 
     /// <summary>
-    /// Insert all instructions required to print a string from the top of the stack
+    /// Push the memory index of a given memory onto the stack
+    /// </summary>
+    /// <param name="constantRef"></param>
+    [Macro("memidx", description:"Load the memory index which contains the constant")]
+    public void PushMemoryIndex(MemoryRef constantRef) {
+        this.PushInt32(constantRef.MemoryIndex);
+    }
+
+    /// <summary>
+    /// Push the memory offset of a given memory onto the stack
+    /// </summary>
+    /// <param name="constantRef"></param>
+    [Macro("memaddr", description: "Load the memory address offset of a given constant")]
+    public void PushMemoryAddress(MemoryRef constantRef) {
+        this.PushInt32(constantRef.Offset);
+    }
+
+    /// <summary>
+    /// Insert all instructions required to print a string from a memory ref
     /// </summary>
     [Macro("printstr", description: "Insert all instructions required to print a string from memory.")]
     public void PrintString(MemoryRef constant) {
         PushInt32(constant.Offset);
         PrintStringOnStack(constant.MemoryIndex);
     }
+    /// <summary>
+    /// Insert all instructions required to print a string from the stack
+    /// </summary>
     [Macro("printstr_onstack", description: "Insert all instructions required to print a string from the top of the stack.")]
     public void PrintStringOnStack(int memoryIndex) {
         // High level version of what we are attempting to do in bytecode assembly

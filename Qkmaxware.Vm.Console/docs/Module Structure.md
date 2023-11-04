@@ -67,49 +67,38 @@ Following that, each instruction is encoded using a single byte for the opcode f
 
 For more information of each instruction and it's arguments read about the [[Bytecode Instruction Set]].
 
-## Data Segment
-The data segment of the module is used for storing data which can be accessed at runtime. The data segment is broken up into 2 different pools. The size of the data-section remains fixed during the execution of a program. The **Constant Pool** is used for storing constant data that will not change during the length of the program's execution. On the other hand, the **Static Pool** stored data that can be both read and updated from the pool at runtime. 
+## Data
+The data segment of the module is used for storing data which can be accessed at runtime. The data segment is composed of different "memories". Memories can have different sizes and differing types of permissions. You may have any number of memories (up to Int32.Max) and each memory can have between 0 and Int32.Max bytes. 
+
+The header of the data segment simply provides a single number that indicates how many memories are defined in the module.
+
+| Bytes        | Description                              |
+|--------------|------------------------------------------|
+| 4 bytes      | Number of memories in the code section   |
+
+Following the header, each memory is described in order. Each memory is composed of the following bytes.
+
+| Bytes        | Description                                          |
+|--------------|------------------------------------------------------|
+| 1 bytes      | Access Permissions (None=00, R=01, W=10, RW=11)      |
+| 4 bytes      | Min size in bytes                                    |
+| 4 bytes      | Max size in bytes (-1 if no max size provided)       |
+| 4 bytes      | Count of bytes to copy into memory when instantiated |
+| * bytes      | Bytes to copy into memory when instantiated          |
+
+The above is referred to as a memory spec and will be instantiated into a full memory by the virtual machine when the module is loaded. If element 4 (byte count) is 0 then the memory is initialized with a default empty block. If element 4 is not zero then the following bytes are copied into the newly initialized memory. This is referred to a data initializer. As such, the data initializer should be properly formatted for the VM to properly read the memory once initialized.
+
+Memory should be properly formatted into blocks. There may be 1 or more blocks in a memory. Each block is defined by a single byte indicating if the block is free for use (0) or used (not zero). This is followed by the size of the block in memory as an Int32. After the last byte, the next block can start. For an "empty" memory there should be a single block spanning the entire size of the memory which is marked as free. The ModuleBuilder class can be used to more easily create data initializers with well-formatted blocks.  
 
 ### Constant Pool
-The constant pool is a region in the bytecode file for storing values that are to remain unchanged throughout the runtime of a program.
+A constant pool is a region in the bytecode file for storing values that are to remain unchanged throughout the runtime of a program. In the module syntax, a constant pool is simply a memory with read-only access. 
 
-The constant pool is strongly typed and each element can be accessed by a single index into the pool. This makes the Constant Pool more flexible than the Static Pool for storing values as values that take up larger amounts of memory will still only occupy a single slot in the constant pool thanks to this type system allowing for each value to be read one at a time. 
-
-The header of the constant pool, like other sections, is composed only of a single integer representing the number of entries in the constant pool. 
-
-| Bytes        | Description                              |
-|--------------|------------------------------------------|
-| 4 bytes      | Number of entries in the constant pool   |
-
-Each subsequent entry is then encoded in the following format. 
-
-| Bytes        | Description                              |
-|--------------|------------------------------------------|
-| 1 byte       | Tag representing the type of data        |
-| *            | Data bytes differing by data type        |
-
-Every type will encode it's data differently. Some of the included constant types are described in the table below.
-
-| Type    | Tag Value | Encoding                          |
-|---------|-----------|-----------------------------------|
-| Int32   | 0x01      | 4 bytes little endian integer     |
-| UInt32  | 0x02      | 4 bytes little endian integer     |
-| Float32 | 0x03      | 4 bytes little endian single      |
-| Array   | 0x09      | 1 byte element type, 4 for element count, elements encoded individually after |
-| ASCII   | 0x10      | 4 bytes length then characters    |
-| UTF8    | 0x11      | 4 bytes length then characters    |
-| UTF32   | 0x12      | 4 bytes length then characters    |
+Any store instructions directed towards read-only memories will result in runtime exceptions within the VM.
 
 ### Static Pool
-The static pool is a region in the bytecode file for storing values that can change over the lifetime of a program. While the values in the static pool can be updated as a program executes, the total size of the pool remains fixed and as such you can't add or remove elements from the pool, only change existing elements.
-
-Additionally, the Static Pool only contains 32bit values to maintain full compatibility with the stack. These values are un-typed and as such can be treated as any primitive value by whatever instructions operate on them once loaded to the stack. If you wish to store an array in the Static Pool, you should store the array in the heap and then save a pointer to the array in the Static Pool. 
+A static pool is a region in the bytecode file for storing globally accessible values that can change over the lifetime of a program. While the values in the static pool can be updated as a program executes, the total size of the pool remains fixed and as such you can't add or remove elements from the pool, only change existing elements. In the module syntax, a static pool is simply a memory with read-write access, but the max size is equal to the minium size. 
 
 Changes made during runtime to the Static Pool will not effect the bytecode module that they were initially loaded from. 
 
-Since only 32bit values are stored in the Static Pool it's encoding is very simple.
-
-| Bytes        | Description                              |
-|--------------|------------------------------------------|
-| 4 bytes      | Number of entries in the constant pool   |
-| 4 bytes*     | Linear array of 32bit values             |
+### Heap
+A heap is a dynamic region of memory in which values can be created or destroyed over the lifetime of the program. Typically this is used for structures or objects in object oriented languages. In the module syntax, a heap can be created with a memory that has read-write access, but also is capable of growing. This means that the max size of the memory is either -1 meaning no limit other than Int32.Max or the max size is greater than the minimum size. 

@@ -22,16 +22,17 @@ Each line of the file is treated as its own command. Most commands are directly 
 
 <comment>        ::= regex("//[^\n]+") -> skip
 <statement-list> ::= (<statement> "\n")*
-<statement>      ::= <import> | <export> | <label> | <constant-def> | <macro> | <instruction>
+<statement>      ::= <import> | <export> | <memory-decl> | <label> | <constant-def> | <macro> | <instruction>
 <import>         ::= "import" <string>
 <export>         ::= "export" <string>
+<memory-decl>    ::= "memory" $<identifier> DIGIT+UOM
 <label>          ::= "." <identifier>
 <constant-def>   ::= "@" <identifier> "=" <arg>
 <macro>          ::= "!" <identifier> <arg-list>
 <instruction>    ::= <identifier> <arg-list>
 
 <arg-list>       ::= <arg>*
-<arg>            ::= INTEGER | LONG | FLOAT | STRING | "@" <identifier>
+<arg>            ::= INTEGER | LONG | FLOAT | STRING | "@" <identifier> | "$" <identifier> | "." <identifier>
 <identifier>     ::= (LETTER | DIGIT | "_")+
 ```
 
@@ -51,6 +52,12 @@ import "ExternalModule.SubprogramName"
 Exports are indicators that a given subprogram in the module can be used by another module. Exports act as named labels to parts of your code and should be placed at the start of the subprogram code. The syntax for an export command is the world **export** followed by a doubly quoted JSON formatted string representing the name of the exported subprogram.
 ```
 export "MySubprogram"
+```
+
+### Memory Declarations
+Memory declarations are statements that indicate that a specific memory should be created. Dollar signs are used to indicate the name of a memory and can be used as arguments to other instructions. A name and size must be provided for each memory to be created.
+```
+memory $heap 12GB
 ```
 
 ### Labels
@@ -81,7 +88,7 @@ You can see a list of all currently supported macros by reading the [[Macro List
 Every other line is treated as an instruction which is mapped directly to instructions supported by the bytecode virtual machine. For a full list of instructions, read the [[Bytecode Instruction Set]] document. The syntax for instructions is an instruction name composed of at least one of the following characters [a-zA-Z0-9_] followed by 0 or more space separated arguments. Numbers, constants (prefixed with @), labels (prefixed with .) and in some cases strings (referencing imports) are able to be used as arguments.
 
 ```
-load_const @hello
+immediate_i32 4
 call_external "System.Console.PrintString" 1
 exit 0
 ```
@@ -97,7 +104,7 @@ import "System.Console.PrintString"
 
 export "Main"
 .main
-    load_const @hello
+    !load_const32 @hello
     call_external ""System.Console.PrintString"" 1
     exit 0
 ```

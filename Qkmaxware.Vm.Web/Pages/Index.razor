@@ -276,21 +276,22 @@ export ""Main""
         sb.AppendLine();
         sb.AppendLine("A rough grammar of the assembly format is as follows:");
         sb.AppendLine(@"<asm>            ::= ""use"" <dialect> <version> <statement-list>
-<dialect>        ::= ""asm""
+<dialect>        ::= <identifier>
 <version>        ::= DIGIT+ ""."" DIGIT+
 
 <comment>        ::= regex(""//[^\n]+"") -> skip
 <statement-list> ::= (<statement> ""\n"")*
-<statement>      ::= <import> | <export> | <label> | <constant-def> | <macro> | <instruction>
+<statement>      ::= <import> | <export> | <memory-decl> | <label> | <constant-def> | <macro> | <instruction>
 <import>         ::= ""import"" <string>
 <export>         ::= ""export"" <string>
+<memory-decl>    ::= ""memory"" $<identifier> DIGIT+UOM
 <label>          ::= ""."" <identifier>
 <constant-def>   ::= ""@"" <identifier> ""="" <arg>
 <macro>          ::= ""!"" <identifier> <arg-list>
 <instruction>    ::= <identifier> <arg-list>
 
 <arg-list>       ::= <arg>*
-<arg>            ::= INTEGER | LONG | FLOAT | STRING | ""@"" <identifier>
+<arg>            ::= INTEGER | LONG | FLOAT | STRING | ""@"" <identifier> | ""$"" <identifier> | ""."" <identifier>
 <identifier>     ::= (LETTER | DIGIT | ""_"")+"
         );
 
